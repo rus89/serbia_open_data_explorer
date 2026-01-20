@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:serbia_open_data_explorer/models/dataset_entry.dart';
 import 'package:serbia_open_data_explorer/services/dataset_loader.dart';
+import 'package:serbia_open_data_explorer/ui/dataset_details_page.dart';
 
 void main() {
   runApp(
@@ -26,7 +27,13 @@ class OpenDataApp extends StatefulWidget {
 class _OpenDataAppState extends State<OpenDataApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: HomePage());
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
+        useMaterial3: true,
+      ),
+      home: HomePage(),
+    );
   }
 }
 
@@ -270,12 +277,20 @@ class _SearchWidgetState extends State<SearchWidget> {
               children: _highlightMatches(entry.name, query),
             ),
           ),
-          subtitle: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black, fontSize: 14),
-              children: _highlightMatches(entry.description, query),
-            ),
-          ),
+          // subtitle: RichText(
+          //   text: TextSpan(
+          //     style: const TextStyle(color: Colors.black, fontSize: 14),
+          //     children: _highlightMatches(entry.description, query),
+          //   ),
+          // ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DatasetDetailsPage(datasetEntry: entry),
+              ),
+            );
+          },
         );
       },
     );
