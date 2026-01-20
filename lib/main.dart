@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:serbia_open_data_explorer/models/dataset_entry.dart';
@@ -23,54 +25,152 @@ class OpenDataApp extends StatefulWidget {
 //---------------------------------------------------------
 class _OpenDataAppState extends State<OpenDataApp> {
   @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: HomePage());
+  }
+}
+
+//---------------------------------------------------------
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+//---------------------------------------------------------
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    final datasetLoader = Provider.of<DatasetLoader>(context);
+    return Scaffold(
+      appBar: AppBar(title: Text('Serbia Open Data Explorer')),
+      body: datasetLoader.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : const SearchWidget(),
+    );
+  }
+}
+
+//---------------------------------------------------------
+class SearchWidget extends StatefulWidget {
+  const SearchWidget({super.key});
+
+  @override
+  State<SearchWidget> createState() => _SearchWidgetState();
+}
+
+//---------------------------------------------------------
+class _SearchWidgetState extends State<SearchWidget> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+
+  @override
   void initState() {
     super.initState();
+    _searchController.addListener(_debounceSearch);
   }
 
   @override
   void dispose() {
+    _searchController.removeListener(_debounceSearch);
+    _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _debounceSearch() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final datasetLoader = Provider.of<DatasetLoader>(context);
-    return MaterialApp(
-      home: Scaffold(
-        body: datasetLoader.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: datasetLoader.datasetEntries.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(datasetLoader.datasetEntries[index].name),
-                    subtitle: Text(
-                      datasetLoader.datasetEntries[index].description,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DatasetDetailPage(
-                            dataset: datasetLoader.datasetEntries[index],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-      ),
+    final allEntries = datasetLoader.datasetEntries;
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: const InputDecoration(
+              labelText: 'Pretraga po nazivu ili opisu',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        Expanded(child: _searchResultsList(allEntries)),
+      ],
     );
   }
-}
 
-class DatasetDetailPage extends StatelessWidget {
-  final DatasetEntry dataset;
-  const DatasetDetailPage({super.key, required this.dataset});
+  //---------------------------------------------------------
+  Widget _searchResultsList(List<DatasetEntry> allEntries) {
+    final query = _searchController.text;
+    final filteredEntries = query.isEmpty
+        ? allEntries
+        : allEntries.where((entry) {
+            final nameMatch = entry.name.toLowerCase().contains(query);
+            final descriptionMatch = entry.description.toLowerCase().contains(
+              query,
+            );
+            return nameMatch || descriptionMatch;
+          }).toList();
+    if (filteredEntries.isEmpty) {
+      return const Center(child: Text('Nema rezultata.'));
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text(dataset.name)));
+    return ListView.builder(
+      itemCount: filteredEntries.length,
+      itemBuilder: (context, index) {
+        final entry = filteredEntries[index];
+        return ListTile(
+          title: RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.black, fontSize: 18),
+              children: _highlightMatches(entry.name, query),
+            ),
+          ),
+          subtitle: RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.black, fontSize: 14),
+              children: _highlightMatches(entry.description, query),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  //---------------------------------------------------------
+  List<TextSpan> _highlightMatches(String source, String query) {
+    if (query.isEmpty) {
+      return [TextSpan(text: source)];
+    }
+    final matches = <TextSpan>[];
+    final queryLower = query.toLowerCase();
+    final sourceLower = source.toLowerCase();
+    int start = 0;
+    int index;
+    while ((index = sourceLower.indexOf(queryLower, start)) != -1) {
+      if (index > start) {
+        matches.add(TextSpan(text: source.substring(start, index)));
+      }
+      matches.add(
+        TextSpan(
+          text: source.substring(index, index + query.length),
+          style: const TextStyle(backgroundColor: Colors.yellow),
+        ),
+      );
+      start = index + query.length;
+    }
+    if (start < source.length) {
+      matches.add(TextSpan(text: source.substring(start)));
+    }
+    return matches;
   }
 }
