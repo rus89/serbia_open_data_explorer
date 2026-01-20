@@ -64,6 +64,10 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
+  String? _selectedOrganization;
+  String? _selectedFormat;
+  String? _selectedTag;
+  String? _selectedUpdateFrequency;
 
   @override
   void initState() {
@@ -103,6 +107,30 @@ class _SearchWidgetState extends State<SearchWidget> {
             ),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: DropdownButtonFormField<String>(
+            initialValue: datasetLoader.allOrganizations.first,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Organizacija',
+              border: OutlineInputBorder(),
+            ),
+            items: datasetLoader.allOrganizations
+                .map(
+                  (organization) => DropdownMenuItem<String>(
+                    value: organization,
+                    child: Text(organization),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedOrganization = value;
+              });
+            },
+          ),
+        ),
         Expanded(child: _searchResultsList(allEntries)),
       ],
     );
@@ -110,16 +138,23 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   //---------------------------------------------------------
   Widget _searchResultsList(List<DatasetEntry> allEntries) {
-    final query = _searchController.text;
-    final filteredEntries = query.isEmpty
-        ? allEntries
-        : allEntries.where((entry) {
-            final nameMatch = entry.name.toLowerCase().contains(query);
-            final descriptionMatch = entry.description.toLowerCase().contains(
-              query,
-            );
-            return nameMatch || descriptionMatch;
-          }).toList();
+    final query = _searchController.text.toLowerCase();
+    final filteredEntries = allEntries.where((entry) {
+      // search condition
+      final matchesQuery = query.isEmpty
+          ? true
+          : entry.name.toLowerCase().contains(query) ||
+                entry.description.toLowerCase().contains(query);
+
+      // organization filter condition
+      final matchesOrganization =
+          _selectedOrganization == null ||
+          _selectedOrganization!.isEmpty ||
+          entry.organization == _selectedOrganization;
+
+      return matchesQuery && matchesOrganization;
+    }).toList();
+
     if (filteredEntries.isEmpty) {
       return const Center(child: Text('Nema rezultata.'));
     }

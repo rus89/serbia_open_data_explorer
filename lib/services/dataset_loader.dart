@@ -25,4 +25,26 @@ class DatasetLoader extends ChangeNotifier {
     isLoading = false;
     notifyListeners();
   }
+
+  //---------------------------------------------------------
+  Set<String> get allOrganizations => datasetEntries
+      .map((entry) => entry.organization)
+      .where((organization) => organization.isNotEmpty)
+      .toSet();
+  //---------------------------------------------------------
+  Set<String> get allResourceFormats => datasetEntries
+      .expand((entry) => entry.resourceFormats)
+      .where((format) => format.isNotEmpty)
+      .toSet();
+  //---------------------------------------------------------
+  Set<String> get allTags => datasetEntries
+      .expand((entry) => entry.tags.split(','))
+      .map((tag) => tag.trim())
+      .where((tag) => tag.isNotEmpty)
+      .toSet();
+  //---------------------------------------------------------
+  Set<String> get allUpdateFrequencies => datasetEntries
+      .map((entry) => entry.updateFrequency)
+      .where((frequency) => frequency.isNotEmpty)
+      .toSet();
 }

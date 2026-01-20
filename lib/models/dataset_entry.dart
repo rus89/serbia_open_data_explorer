@@ -3,7 +3,11 @@ class DatasetEntry {
   final String name;
   final String description;
   final String url;
-  final String format;
+  final String tags;
+  final String organization;
+  final String license;
+  final String updateFrequency;
+  final Set<String> resourceFormats;
 
   //---------------------------------------------------------
   DatasetEntry({
@@ -11,7 +15,11 @@ class DatasetEntry {
     required this.name,
     required this.description,
     required this.url,
-    required this.format,
+    required this.tags,
+    required this.organization,
+    required this.license,
+    required this.updateFrequency,
+    required this.resourceFormats,
   });
 
   //---------------------------------------------------------
@@ -19,9 +27,21 @@ class DatasetEntry {
     return DatasetEntry(
       id: csvLine[0]?.toString() ?? '',
       name: csvLine[1]?.toString() ?? '',
-      description: csvLine[9]?.toString() ?? '',
       url: csvLine[4]?.toString() ?? '',
-      format: csvLine[23]?.toString() ?? '',
+      organization: csvLine[5]?.toString() ?? '',
+      description: csvLine[9]?.toString() ?? '',
+      updateFrequency: csvLine[10]?.toString() ?? '',
+      license: csvLine[11]?.toString() ?? '',
+      tags: csvLine[19]?.toString() ?? '',
+      resourceFormats: (csvLine[23]?.toString().isNotEmpty ?? false)
+          ? csvLine[23]
+                .toString()
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .map((e) => e.toUpperCase())
+                .toSet()
+          : <String>{},
     );
   }
 
@@ -32,13 +52,11 @@ class DatasetEntry {
       'name': name,
       'description': description,
       'url': url,
-      'format': format,
+      'tags': tags,
+      'organization': organization,
+      'license': license,
+      'updateFrequency': updateFrequency,
+      'resourceFormats': resourceFormats.join(','),
     };
-  }
-
-  //---------------------------------------------------------
-  @override
-  String toString() {
-    return 'DatasetEntry(id: $id, name: $name, description: $description, url: $url, format: $format)';
   }
 }
