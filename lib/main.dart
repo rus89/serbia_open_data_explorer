@@ -94,6 +94,10 @@ class _SearchWidgetState extends State<SearchWidget> {
   Widget build(BuildContext context) {
     final datasetLoader = Provider.of<DatasetLoader>(context);
     final allEntries = datasetLoader.datasetEntries;
+    final allOrganizations = datasetLoader.allOrganizations;
+    final allResourceFormats = datasetLoader.allResourceFormats;
+    final allTags = datasetLoader.allTags;
+    final allUpdateFrequencies = datasetLoader.allUpdateFrequencies;
 
     return Column(
       children: [
@@ -110,13 +114,13 @@ class _SearchWidgetState extends State<SearchWidget> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: DropdownButtonFormField<String>(
-            initialValue: datasetLoader.allOrganizations.first,
+            initialValue: _selectedOrganization,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Organizacija',
               border: OutlineInputBorder(),
             ),
-            items: datasetLoader.allOrganizations
+            items: allOrganizations
                 .map(
                   (organization) => DropdownMenuItem<String>(
                     value: organization,
@@ -134,13 +138,13 @@ class _SearchWidgetState extends State<SearchWidget> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: DropdownButtonFormField<String>(
-            initialValue: datasetLoader.allResourceFormats.first,
+            initialValue: _selectedFormat,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Format',
               border: OutlineInputBorder(),
             ),
-            items: datasetLoader.allResourceFormats
+            items: allResourceFormats
                 .map(
                   (format) => DropdownMenuItem<String>(
                     value: format,
@@ -158,13 +162,13 @@ class _SearchWidgetState extends State<SearchWidget> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: DropdownButtonFormField<String>(
-            initialValue: datasetLoader.allTags.first,
+            initialValue: _selectedTag,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Tagovi',
               border: OutlineInputBorder(),
             ),
-            items: datasetLoader.allTags
+            items: allTags
                 .map(
                   (tag) =>
                       DropdownMenuItem<String>(value: tag, child: Text(tag)),
@@ -180,13 +184,13 @@ class _SearchWidgetState extends State<SearchWidget> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: DropdownButtonFormField<String>(
-            initialValue: datasetLoader.allUpdateFrequencies.first,
+            initialValue: _selectedUpdateFrequency,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Frekvencija ažuriranja',
               border: OutlineInputBorder(),
             ),
-            items: datasetLoader.allUpdateFrequencies
+            items: allUpdateFrequencies
                 .map(
                   (frequency) => DropdownMenuItem<String>(
                     value: frequency,
@@ -222,7 +226,33 @@ class _SearchWidgetState extends State<SearchWidget> {
           _selectedOrganization!.isEmpty ||
           entry.organization == _selectedOrganization;
 
-      return matchesQuery && matchesOrganization;
+      // format filter condition
+      final matchesFormat =
+          _selectedFormat == null ||
+          _selectedFormat!.isEmpty ||
+          entry.resourceFormats.any(
+            (format) => format.trim() == _selectedFormat!.trim(),
+          );
+
+      // tag filter condition
+      final matchesTag =
+          _selectedTag == null ||
+          _selectedTag!.isEmpty ||
+          entry.tags
+              .split(',')
+              .any((tag) => tag.trim() == _selectedTag!.trim());
+
+      // update frequency filter condition
+      final matchesUpdateFrequency =
+          _selectedUpdateFrequency == null ||
+          _selectedUpdateFrequency!.isEmpty ||
+          entry.updateFrequency == _selectedUpdateFrequency;
+
+      return matchesQuery &&
+          matchesOrganization &&
+          matchesFormat &&
+          matchesTag &&
+          matchesUpdateFrequency;
     }).toList();
 
     if (filteredEntries.isEmpty) {
