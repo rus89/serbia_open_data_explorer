@@ -17,11 +17,11 @@ class DatasetEntry {
   //---------------------------------------------------------
   factory DatasetEntry.fromCSV(List<dynamic> csvLine) {
     return DatasetEntry(
-      id: csvLine[0],
-      name: csvLine[1],
-      description: csvLine[2],
-      url: csvLine[3],
-      format: csvLine[4],
+      id: csvLine[0]?.toString() ?? '',
+      name: csvLine[1]?.toString() ?? '',
+      description: csvLine[9]?.toString() ?? '',
+      url: csvLine[4]?.toString() ?? '',
+      format: csvLine[23]?.toString() ?? '',
     );
   }
 

@@ -1,10 +1,15 @@
-import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:serbia_open_data_explorer/models/dataset_entry.dart';
+import 'package:serbia_open_data_explorer/services/dataset_loader.dart';
 
 void main() {
-  runApp(const OpenDataApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => DatasetLoader()..loadDatasets(),
+      child: const OpenDataApp(),
+    ),
+  );
 }
 
 //---------------------------------------------------------
@@ -17,13 +22,9 @@ class OpenDataApp extends StatefulWidget {
 
 //---------------------------------------------------------
 class _OpenDataAppState extends State<OpenDataApp> {
-  bool isLoading = true;
-  List<DatasetEntry> datasetEntries = [];
-
   @override
   void initState() {
     super.initState();
-    _loadDatasets();
   }
 
   @override
@@ -31,26 +32,45 @@ class _OpenDataAppState extends State<OpenDataApp> {
     super.dispose();
   }
 
-  Future<void> _loadDatasets() async {
-    final String datasetString = await rootBundle.loadString(
-      'assets/data/datasets/datasets.csv',
+  @override
+  Widget build(BuildContext context) {
+    final datasetLoader = Provider.of<DatasetLoader>(context);
+    return MaterialApp(
+      home: Scaffold(
+        body: datasetLoader.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                itemCount: datasetLoader.datasetEntries.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(datasetLoader.datasetEntries[index].name),
+                    subtitle: Text(
+                      datasetLoader.datasetEntries[index].description,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DatasetDetailPage(
+                            dataset: datasetLoader.datasetEntries[index],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+      ),
     );
-    final List<List<dynamic>> csvResult = CsvToListConverter().convert(
-      datasetString,
-    );
-    datasetEntries = csvResult
-        .map((line) => DatasetEntry.fromCSV(line))
-        .toList();
-    setState(() {
-      datasetEntries = datasetEntries;
-      isLoading = false;
-    });
   }
+}
+
+class DatasetDetailPage extends StatelessWidget {
+  final DatasetEntry dataset;
+  const DatasetDetailPage({super.key, required this.dataset});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Serbia Open Data Explorer'))),
-    );
+    return Scaffold(appBar: AppBar(title: Text(dataset.name)));
   }
 }
