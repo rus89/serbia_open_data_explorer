@@ -108,7 +108,7 @@ class _SearchWidgetState extends State<SearchWidget> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.all(8.0),
           child: DropdownButtonFormField<String>(
             initialValue: datasetLoader.allOrganizations.first,
             isExpanded: true,
@@ -127,6 +127,76 @@ class _SearchWidgetState extends State<SearchWidget> {
             onChanged: (value) {
               setState(() {
                 _selectedOrganization = value;
+              });
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DropdownButtonFormField<String>(
+            initialValue: datasetLoader.allResourceFormats.first,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Format',
+              border: OutlineInputBorder(),
+            ),
+            items: datasetLoader.allResourceFormats
+                .map(
+                  (format) => DropdownMenuItem<String>(
+                    value: format,
+                    child: Text(format),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedFormat = value;
+              });
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DropdownButtonFormField<String>(
+            initialValue: datasetLoader.allTags.first,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Tagovi',
+              border: OutlineInputBorder(),
+            ),
+            items: datasetLoader.allTags
+                .map(
+                  (tag) =>
+                      DropdownMenuItem<String>(value: tag, child: Text(tag)),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedTag = value;
+              });
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DropdownButtonFormField<String>(
+            initialValue: datasetLoader.allUpdateFrequencies.first,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Frekvencija ažuriranja',
+              border: OutlineInputBorder(),
+            ),
+            items: datasetLoader.allUpdateFrequencies
+                .map(
+                  (frequency) => DropdownMenuItem<String>(
+                    value: frequency,
+                    child: Text(frequency),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedUpdateFrequency = value;
               });
             },
           ),
