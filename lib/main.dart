@@ -5,6 +5,7 @@ import 'package:serbia_open_data_explorer/models/dataset_entry.dart';
 import 'package:serbia_open_data_explorer/services/dataset_loader.dart';
 import 'package:serbia_open_data_explorer/ui/dataset_details_page.dart';
 
+//---------------------------------------------------------
 void main() {
   runApp(
     ChangeNotifierProvider(
