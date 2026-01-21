@@ -45,7 +45,32 @@ void main() {
     });
 
     test('handles missing optional fields gracefully', () {
-      final csvRow = ['', '', '', '', ''];
+      final csvRow = [
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+      ];
       final datasetEntry = DatasetEntry.fromCSV(csvRow);
 
       expect(datasetEntry.id, '');
