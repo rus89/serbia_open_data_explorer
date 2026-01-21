@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:serbia_open_data_explorer/models/dataset_entry.dart';
@@ -93,7 +92,9 @@ class _SearchWidgetState extends State<SearchWidget> {
   void _debounceSearch() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -108,108 +109,158 @@ class _SearchWidgetState extends State<SearchWidget> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Pretraga po nazivu ili opisu',
-              border: OutlineInputBorder(),
+        Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1.0,
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedOrganization,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Organizacija',
-              border: OutlineInputBorder(),
-            ),
-            items: allOrganizations
-                .map(
-                  (organization) => DropdownMenuItem<String>(
-                    value: organization,
-                    child: Text(organization),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Filteri i pretraga',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
                   ),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedOrganization = value;
-              });
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedFormat,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Format',
-              border: OutlineInputBorder(),
-            ),
-            items: allResourceFormats
-                .map(
-                  (format) => DropdownMenuItem<String>(
-                    value: format,
-                    child: Text(format),
+                  IconButton(
+                    icon: const Icon(Icons.clear_all),
+                    tooltip: 'Očisti filtere',
+                    onPressed: () {
+                      setState(() {
+                        _selectedOrganization = null;
+                        _selectedFormat = null;
+                        _selectedTag = null;
+                        _selectedUpdateFrequency = null;
+                      });
+                    },
                   ),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedFormat = value;
-              });
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedTag,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Tagovi',
-              border: OutlineInputBorder(),
-            ),
-            items: allTags
-                .map(
-                  (tag) =>
-                      DropdownMenuItem<String>(value: tag, child: Text(tag)),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedTag = value;
-              });
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedUpdateFrequency,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Frekvencija ažuriranja',
-              border: OutlineInputBorder(),
-            ),
-            items: allUpdateFrequencies
-                .map(
-                  (frequency) => DropdownMenuItem<String>(
-                    value: frequency,
-                    child: Text(frequency),
+                ],
+              ),
+              SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: const InputDecoration(
+                            icon: Icon(Icons.search_outlined),
+                            labelText: 'Pretraga po nazivu ili opisu',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _selectedOrganization,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Organizacija',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: allOrganizations
+                              .map(
+                                (organization) => DropdownMenuItem<String>(
+                                  value: organization,
+                                  child: Text(organization),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedOrganization = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _selectedFormat,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Format',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: allResourceFormats
+                              .map(
+                                (format) => DropdownMenuItem<String>(
+                                  value: format,
+                                  child: Text(format),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedFormat = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _selectedTag,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Tagovi',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: allTags
+                              .map(
+                                (tag) => DropdownMenuItem<String>(
+                                  value: tag,
+                                  child: Text(tag),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedTag = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _selectedUpdateFrequency,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Frekvencija ažuriranja',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: allUpdateFrequencies
+                              .map(
+                                (frequency) => DropdownMenuItem<String>(
+                                  value: frequency,
+                                  child: Text(frequency),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedUpdateFrequency = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedUpdateFrequency = value;
-              });
-            },
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(child: _searchResultsList(allEntries)),
