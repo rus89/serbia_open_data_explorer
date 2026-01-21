@@ -302,22 +302,37 @@ class _SearchWidgetState extends State<SearchWidget> {
             itemCount: filteredEntries.length,
             itemBuilder: (context, index) {
               final entry = filteredEntries[index];
-              return ListTile(
-                title: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.black, fontSize: 18),
-                    children: _highlightMatches(entry.name, query),
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    width: 1.0,
                   ),
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          DatasetDetailsPage(datasetEntry: entry),
+                child: ListTile(
+                  title: RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.titleMedium,
+                      children: _highlightMatches(entry.name, query),
                     ),
-                  );
-                },
+                  ),
+                  subtitle: RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      children: _highlightMatches(entry.description, query),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DatasetDetailsPage(datasetEntry: entry),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           ),
