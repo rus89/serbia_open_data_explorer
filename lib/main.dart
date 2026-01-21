@@ -284,27 +284,45 @@ class _SearchWidgetState extends State<SearchWidget> {
       return const Center(child: Text('Nema rezultata.'));
     }
 
-    return ListView.builder(
-      itemCount: filteredEntries.length,
-      itemBuilder: (context, index) {
-        final entry = filteredEntries[index];
-        return ListTile(
-          title: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black, fontSize: 18),
-              children: _highlightMatches(entry.name, query),
-            ),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DatasetDetailsPage(datasetEntry: entry),
+    return Column(
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Pronađeno rezultata: ${filteredEntries.length} / ${allEntries.length}',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            );
-          },
-        );
-      },
+            ),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: filteredEntries.length,
+            itemBuilder: (context, index) {
+              final entry = filteredEntries[index];
+              return ListTile(
+                title: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(color: Colors.black, fontSize: 18),
+                    children: _highlightMatches(entry.name, query),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DatasetDetailsPage(datasetEntry: entry),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
