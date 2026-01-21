@@ -28,56 +28,105 @@ class DatasetDetailsPage extends StatelessWidget {
     debugPrint('launchUrl($uri) = $launched');
   }
 
+  //---------------------------------------------------------
+  Widget _buildChipSection(IconData icon, String label, List<String> chips) {
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(icon),
+                const SizedBox(width: 8.0),
+                Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Wrap(
+              spacing: 6.0,
+              runSpacing: 6.0,
+              children: chips.map((chip) => Chip(label: Text(chip))).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //---------------------------------------------------------
   @override
   Widget build(BuildContext context) {
+    // Use Theme.of(context).textTheme for consistent text styles
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(title: Text(datasetEntry.name)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            Text(datasetEntry.description),
+            Text(datasetEntry.description, style: textTheme.bodyMedium),
+            _buildChipSection(
+              Icons.tag,
+              'Oznake',
+              datasetEntry.tags
+                  .split(',')
+                  .map((tag) => tag.trim())
+                  .where((tag) => tag.isNotEmpty)
+                  .toList(),
+            ),
+            _buildChipSection(
+              Icons.format_list_bulleted,
+              'Formati',
+              datasetEntry.resourceFormats.toList(),
+            ),
+            const SizedBox(height: 16.0),
             Card(
               child: ListTile(
-                leading: const Icon(Icons.link),
-                title: const Text('Organizacija'),
-                subtitle: Text(datasetEntry.organization),
+                leading: const Icon(Icons.account_balance),
+                title: Text('Organizacija', style: textTheme.bodyMedium),
+                subtitle: Text(
+                  datasetEntry.organization,
+                  style: textTheme.bodyMedium,
+                ),
               ),
             ),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.description),
-                title: const Text('Licenca'),
-                subtitle: Text(datasetEntry.license),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.tag),
-                title: const Text('Oznake'),
-                subtitle: Text(datasetEntry.tags),
+                title: Text('Licenca', style: textTheme.bodyMedium),
+                subtitle: Text(
+                  datasetEntry.license,
+                  style: textTheme.bodyMedium,
+                ),
               ),
             ),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.update),
-                title: const Text('Frekvencija ažuriranja'),
-                subtitle: Text(datasetEntry.updateFrequency),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.format_list_bulleted),
-                title: const Text('Formati'),
-                subtitle: Text(datasetEntry.resourceFormats.join(', ')),
+                title: Text(
+                  'Frekvencija ažuriranja',
+                  style: textTheme.bodyMedium,
+                ),
+                subtitle: Text(
+                  datasetEntry.updateFrequency,
+                  style: textTheme.bodyMedium,
+                ),
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openUrl(datasetEntry.url),
-        child: const Icon(Icons.open_in_new),
+        icon: const Icon(Icons.open_in_new),
+        label: const Text('Otvori'),
       ),
     );
   }
