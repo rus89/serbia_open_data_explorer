@@ -35,30 +35,49 @@ class DatasetDetailsPage extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          children: [
+          children: <Widget>[
             Text(datasetEntry.description),
-            ListTile(
-              title: Text('Organizacija'),
-              subtitle: Text(datasetEntry.organization),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Organizacija'),
+                subtitle: Text(datasetEntry.organization),
+              ),
             ),
-            ListTile(
-              title: Text('Licenca'),
-              subtitle: Text(datasetEntry.license),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.description),
+                title: const Text('Licenca'),
+                subtitle: Text(datasetEntry.license),
+              ),
             ),
-            ListTile(
-              title: Text('Frekvencija ažuriranja'),
-              subtitle: Text(datasetEntry.updateFrequency),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.tag),
+                title: const Text('Oznake'),
+                subtitle: Text(datasetEntry.tags),
+              ),
             ),
-            ListTile(
-              title: Text('Formati'),
-              subtitle: Text(datasetEntry.resourceFormats.join(', ')),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.update),
+                title: const Text('Frekvencija ažuriranja'),
+                subtitle: Text(datasetEntry.updateFrequency),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.format_list_bulleted),
+                title: const Text('Formati'),
+                subtitle: Text(datasetEntry.resourceFormats.join(', ')),
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openUrl(datasetEntry.url),
-        child: Icon(Icons.open_in_new),
+        child: const Icon(Icons.open_in_new),
       ),
     );
   }
