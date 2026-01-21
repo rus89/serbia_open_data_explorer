@@ -160,101 +160,37 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _selectedOrganization,
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Organizacija',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: allOrganizations
-                              .map(
-                                (organization) => DropdownMenuItem<String>(
-                                  value: organization,
-                                  child: Text(organization),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedOrganization = value;
-                            });
-                          },
-                        ),
+                      _buildFilterDropdown(
+                        label: 'Organizacija',
+                        selectedValue: _selectedOrganization,
+                        options: allOrganizations,
+                        onChanged: (value) {
+                          _selectedOrganization = value;
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _selectedFormat,
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Format',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: allResourceFormats
-                              .map(
-                                (format) => DropdownMenuItem<String>(
-                                  value: format,
-                                  child: Text(format),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedFormat = value;
-                            });
-                          },
-                        ),
+                      _buildFilterDropdown(
+                        label: 'Format resursa',
+                        selectedValue: _selectedFormat,
+                        options: allResourceFormats,
+                        onChanged: (value) {
+                          _selectedFormat = value;
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _selectedTag,
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Tagovi',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: allTags
-                              .map(
-                                (tag) => DropdownMenuItem<String>(
-                                  value: tag,
-                                  child: Text(tag),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedTag = value;
-                            });
-                          },
-                        ),
+                      _buildFilterDropdown(
+                        label: 'Oznaka (tag)',
+                        selectedValue: _selectedTag,
+                        options: allTags,
+                        onChanged: (value) {
+                          _selectedTag = value;
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _selectedUpdateFrequency,
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Frekvencija ažuriranja',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: allUpdateFrequencies
-                              .map(
-                                (frequency) => DropdownMenuItem<String>(
-                                  value: frequency,
-                                  child: Text(frequency),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedUpdateFrequency = value;
-                            });
-                          },
-                        ),
+                      _buildFilterDropdown(
+                        label: 'Frekvencija ažuriranja',
+                        selectedValue: _selectedUpdateFrequency,
+                        options: allUpdateFrequencies,
+                        onChanged: (value) {
+                          _selectedUpdateFrequency = value;
+                        },
                       ),
                     ],
                   ),
@@ -265,6 +201,37 @@ class _SearchWidgetState extends State<SearchWidget> {
         ),
         Expanded(child: _searchResultsList(allEntries)),
       ],
+    );
+  }
+
+  //---------------------------------------------------------
+  Widget _buildFilterDropdown({
+    required String label,
+    required String? selectedValue,
+    required Set<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: DropdownButtonFormField<String>(
+        initialValue: selectedValue,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        items: options
+            .map(
+              (option) =>
+                  DropdownMenuItem<String>(value: option, child: Text(option)),
+            )
+            .toList(),
+        onChanged: (value) {
+          setState(() {
+            onChanged(value);
+          });
+        },
+      ),
     );
   }
 
@@ -328,12 +295,6 @@ class _SearchWidgetState extends State<SearchWidget> {
               children: _highlightMatches(entry.name, query),
             ),
           ),
-          // subtitle: RichText(
-          //   text: TextSpan(
-          //     style: const TextStyle(color: Colors.black, fontSize: 14),
-          //     children: _highlightMatches(entry.description, query),
-          //   ),
-          // ),
           onTap: () {
             Navigator.push(
               context,
