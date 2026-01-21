@@ -54,6 +54,8 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(title: Text('Serbia Open Data Explorer')),
       body: datasetLoader.isLoading
           ? const Center(child: CircularProgressIndicator())
+          : datasetLoader.errorMessage.isNotEmpty
+          ? Center(child: Text('Error: ${datasetLoader.errorMessage}'))
           : const SearchWidget(),
     );
   }

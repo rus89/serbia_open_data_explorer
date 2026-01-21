@@ -8,24 +8,25 @@ class DatasetDetailsPage extends StatelessWidget {
   const DatasetDetailsPage({super.key, required this.datasetEntry});
 
   //---------------------------------------------------------
-  Future<void> _openUrl(String url) async {
-    if (url.isEmpty) return;
+  Future<bool> _openUrl(String url) async {
+    if (url.isEmpty) return false;
     final uri = Uri.tryParse(url);
     if (uri == null) {
       debugPrint('Invalid URL: $url');
-      return;
+      return false;
     }
 
     final canLaunch = await canLaunchUrl(uri);
     debugPrint('canLaunchUrl($uri) = $canLaunch');
 
-    if (!canLaunch) return;
+    if (!canLaunch) return false;
 
     final launched = await launchUrl(
       uri,
       mode: LaunchMode.platformDefault, // or omit mode parameter entirely
     );
     debugPrint('launchUrl($uri) = $launched');
+    return launched;
   }
 
   //---------------------------------------------------------
@@ -124,7 +125,27 @@ class DatasetDetailsPage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openUrl(datasetEntry.url),
+        onPressed: () async {
+          if (datasetEntry.url.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Nema dostupnog URL-a za ovaj skup podataka.'),
+              ),
+            );
+            return;
+          }
+
+          final success = await _openUrl(datasetEntry.url);
+          if (!context.mounted) return;
+
+          if (!success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Ne mogu da otvorim URL: ${datasetEntry.url}'),
+              ),
+            );
+          }
+        },
         icon: const Icon(Icons.open_in_new),
         label: const Text('Otvori'),
       ),
