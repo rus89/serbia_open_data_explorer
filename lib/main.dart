@@ -108,7 +108,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     final allUpdateFrequencies = datasetLoader.allUpdateFrequencies;
 
     return Column(
-      children: [
+      children: <Widget>[
         Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
@@ -118,9 +118,9 @@ class _SearchWidgetState extends State<SearchWidget> {
             ),
           ),
           child: Column(
-            children: [
+            children: <Widget>[
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -148,7 +148,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-                    children: [
+                    children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
@@ -285,9 +285,9 @@ class _SearchWidgetState extends State<SearchWidget> {
     }
 
     return Column(
-      children: [
+      children: <Widget>[
         Row(
-          children: [
+          children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
