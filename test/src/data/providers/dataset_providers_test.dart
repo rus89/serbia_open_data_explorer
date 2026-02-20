@@ -50,6 +50,34 @@ void main() {
       expect(response1.data, isA<List<Dataset>>());
       expect(response2.data, isA<List<Dataset>>());
     });
+
+    test('uses filter params when set', () async {
+      container.read(datasetSearchParamsProvider.notifier).updateParams(
+            const DatasetSearchParams(
+              format: 'csv',
+              page: 1,
+              limit: 5,
+            ),
+          );
+      final response = await container.read(datasetSearchResultsProvider.future);
+
+      expect(response.data, isA<List<Dataset>>());
+      expect(response.page, 1);
+      expect(response.pageSize, 5);
+    });
+
+    test('refetches when page changes', () async {
+      container.read(datasetSearchParamsProvider.notifier).updateParams(
+            const DatasetSearchParams(page: 1, limit: 2),
+          );
+      final response1 = await container.read(datasetSearchResultsProvider.future);
+      container.read(datasetSearchParamsProvider.notifier).setPage(2);
+      final response2 = await container.read(datasetSearchResultsProvider.future);
+
+      expect(response1.page, 1);
+      expect(response2.page, 2);
+      expect(response2.data, isA<List<Dataset>>());
+    });
   });
 
   group('datasetDetailProvider', () {
