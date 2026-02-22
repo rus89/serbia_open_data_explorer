@@ -45,7 +45,7 @@ Only pause to ask for confirmation when:
 ## Spawning agents
 
 - When spawning sub-agents via Task tool, ALWAYS include this instruction in the prompt:
-  "Read and follow all rules in .cursor/rules/GlobalRules.md and .cursor/rules/ProjectRules.md at the project root before starting any work."
+  "Read and follow all rules in CLAUDE.md at the project root before starting any work."
 - Sub-agents do NOT inherit this file automatically — you are responsible for passing context.
 
 ## Designing software
