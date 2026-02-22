@@ -89,6 +89,9 @@ todos:
   - id: phase6-test-green
     content: Run flutter test; all pass; maintain coverage (e.g. ≥80%) if required
     status: pending
+  - id: todo-1771772214603-e7nh6fe5l
+    content: Update `README.md` to represent this project in its best way
+    status: pending
 isProject: false
 ---
 
