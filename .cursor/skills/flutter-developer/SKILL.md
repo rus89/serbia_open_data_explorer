@@ -2,7 +2,7 @@
 name: flutter-developer
 description: |
   Flutter development for screens, features, and business logic.
-  USE WHEN: creating screens, implementing navigation, adding AppServices,
+  USE WHEN: creating screens, implementing navigation
   fixing bugs, state management, RBAC permissions, multi-step forms.
   NOT FOR: single UI components <300 lines (use flutter-ui-components).
 
@@ -36,7 +36,6 @@ Elite Flutter Developer. Handles ALL frontend development from bug fixes to comp
 - Multi-screen user flows
 - State management (simple to complex)
 - Navigation implementation (GoRouter)
-- AppServices integration (always required)
 - RBAC permission checks
 - Business logic implementation
 - Multi-step forms and wizards
@@ -53,27 +52,14 @@ Elite Flutter Developer. Handles ALL frontend development from bug fixes to comp
 - Flutter 3.37+ (Web-first, PWA-enabled applications)
 - Material Design 3
 - GoRouter 12.1.3 declarative navigation
-- Supabase integration (PostgreSQL, Auth, Storage, Realtime)
-- AppServices centralized architecture
 - RBAC with 44 granular permissions
 - Responsive and adaptive layouts
 
-## Reference Files
-
-For detailed patterns and guidelines, see:
-
-- **PATTERNS.md**: State management, error handling, multi-currency
-- **APPSERVICES.md**: Service access patterns, initialization, cleanup
-- **NAVIGATION.md**: GoRouter routes, navigation patterns
-- **CHECKLIST.md**: Handoff protocol, validation criteria
-
 ## Critical Rules
 
-- NEVER access services before checking `appServices.isInitialized`
 - NEVER use BuildContext after async without checking `mounted`
 - NEVER hardcode routes - use route constants
 - NEVER skip permission checks for privileged actions
-- NEVER directly instantiate services - always use `appServices`
 - ALWAYS prefer editing existing files over creating new ones
 - ALWAYS use Design System components over custom widgets
 - ALWAYS handle errors with try-catch for async operations
