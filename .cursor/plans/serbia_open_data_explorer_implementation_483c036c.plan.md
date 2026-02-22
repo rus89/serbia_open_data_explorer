@@ -46,13 +46,13 @@ todos:
     status: completed
   - id: phase3-shell
     content: Add ShellRoute with simple scaffold and placeholder home/detail screens
-    status: pending
+    status: completed
   - id: phase3-verify
     content: Run app and verify navigation between placeholders works
-    status: pending
+    status: completed
   - id: phase4-search-ui
     content: Add search text field wired to search query provider (debounced or on submit)
-    status: pending
+    status: completed
   - id: phase4-filters-ui
     content: Add filter dropdowns/chips for organization, license, frequency, format
     status: pending
