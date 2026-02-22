@@ -39,7 +39,19 @@ class _PlaceholderHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Catalog (home)'));
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Catalog (home)'),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () => context.push(AppRoutes.datasetDetailPath('sample-id')),
+            child: const Text('Open sample dataset'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
