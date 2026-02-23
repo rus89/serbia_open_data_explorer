@@ -18,7 +18,16 @@ GoRouter createAppRouter() {
     routes: [
       ShellRoute(
         builder: (context, state, child) => Scaffold(
-          appBar: AppBar(title: const Text('Otvoreni podaci Srbije')),
+          appBar: AppBar(
+            title: const Text('Otvoreni podaci Srbije'),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(
+                height: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
+          ),
           body: child,
         ),
         routes: [
@@ -68,19 +77,28 @@ class _HomeScreenState extends ConsumerState<_HomeScreen> {
     final organizationsAsync = ref.watch(organizationsProvider);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Pretraži skupove podataka',
-              hintText: 'Unesite pojam za pretragu',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: 'Pretraži skupove podataka',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        paramsNotifier.setQuery('');
+                      },
+                    )
+                  : null,
             ),
             textInputAction: TextInputAction.search,
             onSubmitted: _onSearchSubmitted,
+            onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 12),
           _FilterSection(
@@ -102,7 +120,7 @@ class _HomeScreenState extends ConsumerState<_HomeScreen> {
   }
 }
 
-/// Filter dropdowns for organization, license, frequency, format.
+/// Collapsible filter section: organization, license, frequency, format.
 class _FilterSection extends StatelessWidget {
   const _FilterSection({
     required this.params,
@@ -120,57 +138,79 @@ class _FilterSection extends StatelessWidget {
   final AsyncValue<List<OrganizationOption>> organizationsAsync;
   final VoidCallback onReset;
 
+  static bool _hasActiveFilters(DatasetSearchParams p) {
+    return (p.organization != null && p.organization!.isNotEmpty) ||
+        (p.license != null && p.license!.isNotEmpty) ||
+        (p.frequency != null && p.frequency!.isNotEmpty) ||
+        (p.format != null && p.format!.isNotEmpty);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: onReset,
-            icon: const Icon(Icons.filter_list_off, size: 20),
-            label: const Text('Resetuj sve filtere'),
+    final theme = Theme.of(context);
+    final hasFilters = _hasActiveFilters(params);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+      borderRadius: BorderRadius.circular(12),
+      child: ExpansionTile(
+        leading: Icon(
+          Icons.tune,
+          size: 22,
+          color: hasFilters
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurfaceVariant,
+        ),
+        title: Text(
+          'Filteri',
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        _FilterDropdown<String>(
-          label: 'Organizacija',
-          value: params.organization,
-          allLabel: 'Sve organizacije',
-          options: organizationsAsync.valueOrNull
-              ?.map((o) => (o.id, o.name))
-              .toList(),
-          onChanged: paramsNotifier.setOrganization,
-        ),
-        const SizedBox(height: 8),
-        _FilterDropdown<String>(
-          label: 'Licenca',
-          value: params.license,
-          allLabel: 'Sve licence',
-          options: licensesAsync.valueOrNull
-              ?.map((l) => (l.id, l.title))
-              .toList(),
-          onChanged: paramsNotifier.setLicense,
-        ),
-        const SizedBox(height: 8),
-        _FilterDropdown<String>(
-          label: 'Učestalost',
-          value: params.frequency,
-          allLabel: 'Sve učestalosti',
-          options: frequenciesAsync.valueOrNull
-              ?.map((f) => (f.id, f.label))
-              .toList(),
-          onChanged: paramsNotifier.setFrequency,
-        ),
-        const SizedBox(height: 8),
-        _FilterDropdown<String>(
-          label: 'Format',
-          value: params.format,
-          allLabel: 'Svi formati',
-          options: formatFilterOptions,
-          onChanged: paramsNotifier.setFormat,
-        ),
-      ],
+        trailing: hasFilters
+            ? TextButton(onPressed: onReset, child: const Text('Reset'))
+            : null,
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        children: [
+          _FilterDropdown<String>(
+            label: 'Organizacija',
+            value: params.organization,
+            allLabel: 'Sve organizacije',
+            options: organizationsAsync.valueOrNull
+                ?.map((o) => (o.id, o.name))
+                .toList(),
+            onChanged: paramsNotifier.setOrganization,
+          ),
+          const SizedBox(height: 8),
+          _FilterDropdown<String>(
+            label: 'Licenca',
+            value: params.license,
+            allLabel: 'Sve licence',
+            options: licensesAsync.valueOrNull
+                ?.map((l) => (l.id, l.title))
+                .toList(),
+            onChanged: paramsNotifier.setLicense,
+          ),
+          const SizedBox(height: 8),
+          _FilterDropdown<String>(
+            label: 'Učestalost',
+            value: params.frequency,
+            allLabel: 'Sve učestalosti',
+            options: frequenciesAsync.valueOrNull
+                ?.map((f) => (f.id, f.label))
+                .toList(),
+            onChanged: paramsNotifier.setFrequency,
+          ),
+          const SizedBox(height: 8),
+          _FilterDropdown<String>(
+            label: 'Format',
+            value: params.format,
+            allLabel: 'Svi formati',
+            options: formatFilterOptions,
+            onChanged: paramsNotifier.setFormat,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -205,8 +245,10 @@ class _FilterDropdown<T> extends StatelessWidget {
     return InputDecorator(
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
@@ -257,14 +299,29 @@ class _DatasetListView extends ConsumerWidget {
 
     final resultsAsync = ref.watch(datasetSearchResultsProvider);
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return resultsAsync.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Učitavanje...'),
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Učitavanje...',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
@@ -276,25 +333,33 @@ class _DatasetListView extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                const SizedBox(height: 16),
+                Icon(
+                  Icons.cloud_off_outlined,
+                  size: 56,
+                  color: colorScheme.outline,
+                ),
+                const SizedBox(height: 20),
                 Text(
                   'Nije moguće učitati skupove podataka.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   err.toString(),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: () => ref.invalidate(datasetSearchResultsProvider),
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Icons.refresh, size: 20),
                   label: const Text('Pokušaj ponovo'),
                 ),
               ],
@@ -312,21 +377,23 @@ class _DatasetListView extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.inbox_outlined,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.outline,
+                        Icons.search_off,
+                        size: 56,
+                        color: colorScheme.outline,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       Text(
                         'Nema pronađenih skupova podataka.',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Promenite pretragu ili filtere.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -335,6 +402,7 @@ class _DatasetListView extends ConsumerWidget {
                 ),
               )
             : ListView.builder(
+                padding: const EdgeInsets.only(bottom: 24),
                 itemCount: response.data.length,
                 itemBuilder: (context, index) {
                   final dataset = response.data[index];
@@ -349,11 +417,11 @@ class _DatasetListView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 10),
               child: Text(
                 totalLabel,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -376,6 +444,9 @@ class _DatasetListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final formats = dataset.resources
         .map((r) => r.format)
         .whereType<String>()
@@ -385,62 +456,109 @@ class _DatasetListTile extends StatelessWidget {
         .toList();
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        title: Text(
-          dataset.title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (dataset.description != null &&
-                dataset.description!.trim().isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                dataset.description!.trim(),
-                maxLines: _descriptionMaxLines,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
+      margin: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.dataset_outlined,
+                  color: colorScheme.onPrimaryContainer,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      dataset.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    if (dataset.description != null &&
+                        dataset.description!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        dataset.description!.trim(),
+                        maxLines: _descriptionMaxLines,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        if (dataset.organization != null)
+                          _SmallChip(
+                            label: dataset.organization!.name,
+                            colorScheme: colorScheme,
+                          ),
+                        for (final format in formats)
+                          _SmallChip(
+                            label: format.toUpperCase(),
+                            colorScheme: colorScheme,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: colorScheme.onSurfaceVariant,
+                size: 24,
               ),
             ],
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: [
-                if (dataset.organization != null)
-                  Chip(
-                    label: Text(
-                      dataset.organization!.name,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                for (final format in formats)
-                  Chip(
-                    label: Text(
-                      format.toUpperCase(),
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-              ],
-            ),
-          ],
+          ),
         ),
-        isThreeLine: true,
-        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _SmallChip extends StatelessWidget {
+  const _SmallChip({required this.label, required this.colorScheme});
+
+  final String label;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: colorScheme.outlineVariant, width: 1),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

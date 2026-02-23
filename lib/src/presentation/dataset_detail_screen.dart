@@ -19,17 +19,27 @@ class DatasetDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(datasetDetailProvider(id));
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return detailAsync.when(
       loading: () => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: colorScheme.primary,
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               'Učitavanje...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -43,33 +53,30 @@ class DatasetDetailScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
+                Icon(Icons.error_outline, size: 56, color: colorScheme.error),
+                const SizedBox(height: 20),
                 Text(
                   'Nije moguće učitati skup podataka.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   err.toString(),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: () => ref.invalidate(datasetDetailProvider(id)),
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Icons.refresh, size: 20),
                   label: const Text('Pokušaj ponovo'),
                 ),
               ],
@@ -94,19 +101,19 @@ class _DatasetDetailContent extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             dataset.title,
             style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
               color: colorScheme.onSurface,
             ),
           ),
           if (dataset.lastUpdate != null || dataset.lastModified != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               _formatLastUpdate(dataset.lastUpdate ?? dataset.lastModified),
               style: textTheme.bodySmall?.copyWith(
@@ -116,63 +123,45 @@ class _DatasetDetailContent extends StatelessWidget {
           ],
           const SizedBox(height: 24),
           if (dataset.publisherName != null) ...[
-            Text(
-              'Izdavač',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
+            _DetailSection(
+              title: 'Izdavač',
+              child: Text(
+                dataset.publisherName!,
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              dataset.publisherName!,
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
           if (dataset.description != null &&
               dataset.description!.trim().isNotEmpty) ...[
-            Text(
-              'Opis',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
+            _DetailSection(
+              title: 'Opis',
+              child: Text(
+                dataset.description!.trim(),
+                style: textTheme.bodyLarge?.copyWith(
+                  height: 1.55,
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              dataset.description!.trim(),
-              style: textTheme.bodyLarge?.copyWith(
-                height: 1.5,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
           if (dataset.frequency != null && dataset.frequency!.isNotEmpty) ...[
-            Text(
-              'Učestalost ažuriranja',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
+            _DetailSection(
+              title: 'Učestalost ažuriranja',
+              child: Text(
+                dataset.frequency!,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              dataset.frequency!,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
           if (dataset.resources.isNotEmpty) ...[
             Text(
               'Resursi za preuzimanje (${dataset.resources.length})',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
               ),
             ),
@@ -212,6 +201,38 @@ class _DatasetDetailContent extends StatelessWidget {
   }
 }
 
+class _DetailSection extends StatelessWidget {
+  const _DetailSection({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
 class _ResourceTile extends StatelessWidget {
   const _ResourceTile({required this.title, required this.url, this.format});
 
@@ -237,28 +258,48 @@ class _ResourceTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(
-          title,
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.primary,
+      margin: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: () => _openUrl(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                Icons.insert_drive_file_outlined,
+                size: 28,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    if (format != null && format!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        format!.toUpperCase(),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Icon(Icons.download, color: colorScheme.primary, size: 22),
+            ],
           ),
         ),
-        subtitle: format != null && format!.isNotEmpty
-            ? Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(
-                  format!.toUpperCase(),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              )
-            : null,
-        trailing: Icon(Icons.download, color: colorScheme.primary),
-        onTap: () => _openUrl(context),
       ),
     );
   }

@@ -116,6 +116,14 @@ todos:
     status: completed
   - id: todo-1771856624002-4kgomqhcl
     content: UI design is aweful. Want it to be nicelooking, intuitive and professional!
+    status: completed
+  - id: todo-1771857111586-2i9cb5ah5
+    content: |-
+      on the website, datasets has icons for every dataset.
+      try to implement them from API!
+    status: pending
+  - id: todo-1771857254951-o8n0nc5rn
+    content: even if it says that there are over 3000 datasets, it shows just a bunch of them on the homepage, and when the user get to the bottom (last one), no more datasets are loaded in view!
     status: pending
 isProject: false
 ---

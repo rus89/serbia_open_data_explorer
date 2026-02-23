@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'src/presentation/theme/app_theme.dart';
 import 'src/routing/app_router.dart';
 
 void main() {
@@ -16,10 +17,8 @@ class SerbiaOpenDataExplorerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Serbia Open Data Explorer',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      title: 'Otvoreni podaci Srbije',
+      theme: AppTheme.light,
       routerConfig: createAppRouter(),
     );
   }

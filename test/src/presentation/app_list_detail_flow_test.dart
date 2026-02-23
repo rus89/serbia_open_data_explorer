@@ -1,6 +1,7 @@
 // ABOUTME: Widget test for app → list → detail flow. Pumps full app with overridden API client.
 // ABOUTME: Verifies opening app, list showing one dataset, tap navigates to detail with expected content.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:serbia_open_data_explorer/main.dart';
@@ -94,7 +95,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(_flowTestTitle), findsOneWidget);
-      expect(find.text('Resursi za preuzimanje'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is Text && (w.data ?? '').startsWith('Resursi za preuzimanje'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Preuzmi CSV'), findsOneWidget);
     },
   );
