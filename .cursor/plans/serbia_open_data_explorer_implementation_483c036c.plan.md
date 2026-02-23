@@ -82,7 +82,7 @@ todos:
     status: completed
   - id: phase6-widget-test
     content: Add widget or integration test for app → list → detail flow
-    status: pending
+    status: completed
   - id: phase6-analyze
     content: Run flutter analyze and fix until zero issues
     status: pending
@@ -102,6 +102,15 @@ todos:
     status: pending
   - id: todo-1771844118572-yz3xizlen
     content: review and analyze all agents files and AI related files, and see the gaps that can be improved for the future development of Flutter Mobile apps.
+    status: pending
+  - id: todo-1771846549324-6zya9hcmc
+    content: "I noticed that the order of shown datasets in the app is not the same as on the website: https://data.gov.rs/sr/datasets/"
+    status: pending
+  - id: todo-1771846586147-zbp6hn8vt
+    content: I want to show the total number of datasets somewhere in the app!
+    status: pending
+  - id: todo-1771846767247-cft10q4s2
+    content: Add a button to reset all filters in the app!
     status: pending
 isProject: false
 ---
