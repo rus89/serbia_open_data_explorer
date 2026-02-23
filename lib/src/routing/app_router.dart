@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/models/dataset.dart';
 import '../data/models/filter_options.dart';
 import '../data/providers/dataset_providers.dart';
 import 'app_routes.dart';
@@ -89,22 +90,7 @@ class _HomeScreenState extends ConsumerState<_HomeScreen> {
             organizationsAsync: organizationsAsync,
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Katalog'),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () =>
-                        context.push(AppRoutes.datasetDetailPath('sample-id')),
-                    child: const Text('Otvori primer skup podataka'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          Expanded(child: _DatasetListView()),
         ],
       ),
     );
@@ -214,6 +200,179 @@ class _FilterDropdown<T> extends StatelessWidget {
           items: items,
           onChanged: (v) => onChanged(v),
         ),
+      ),
+    );
+  }
+}
+
+/// List view for search results: loading, error, empty, and success states.
+class _DatasetListView extends ConsumerWidget {
+  const _DatasetListView();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final resultsAsync = ref.watch(datasetSearchResultsProvider);
+
+    return resultsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  'Nije moguće učitati skupove podataka.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  err.toString(),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(datasetSearchResultsProvider),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Pokušaj ponovo'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      data: (response) {
+        if (response.data.isEmpty) {
+          return Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nema pronađenih skupova podataka.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Promenite pretragu ili filtere.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return ListView.builder(
+          itemCount: response.data.length,
+          itemBuilder: (context, index) {
+            final dataset = response.data[index];
+            return _DatasetListTile(
+              dataset: dataset,
+              onTap: () =>
+                  context.push(AppRoutes.datasetDetailPath(dataset.id)),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Single dataset row: title, description snippet, organization and format chips.
+class _DatasetListTile extends StatelessWidget {
+  const _DatasetListTile({required this.dataset, required this.onTap});
+
+  final Dataset dataset;
+  final VoidCallback onTap;
+
+  static const int _descriptionMaxLines = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    final formats = dataset.resources
+        .map((r) => r.format)
+        .whereType<String>()
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .take(5)
+        .toList();
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        title: Text(
+          dataset.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (dataset.description != null &&
+                dataset.description!.trim().isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                dataset.description!.trim(),
+                maxLines: _descriptionMaxLines,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                if (dataset.organization != null)
+                  Chip(
+                    label: Text(
+                      dataset.organization!.name,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                for (final format in formats)
+                  Chip(
+                    label: Text(
+                      format.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+              ],
+            ),
+          ],
+        ),
+        isThreeLine: true,
+        onTap: onTap,
       ),
     );
   }

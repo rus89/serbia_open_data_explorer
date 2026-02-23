@@ -58,7 +58,7 @@ todos:
     status: completed
   - id: phase4-list-widget
     content: Build dataset list view with loading, error, empty, success states
-    status: pending
+    status: completed
   - id: phase4-list-navigation
     content: On list item tap, navigate to detail using route constant
     status: pending
@@ -99,6 +99,9 @@ todos:
       - Analyze: flutter analyze
       - Hook setup: git config core.hooksPath .githooks
       - API: https://data.gov.rs/api/1/
+    status: pending
+  - id: todo-1771844118572-yz3xizlen
+    content: review and analyze all agents files and AI related files, and see the gaps that can be improved for the future development of Flutter Mobile apps.
     status: pending
 isProject: false
 ---
