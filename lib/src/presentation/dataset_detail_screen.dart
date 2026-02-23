@@ -20,13 +20,18 @@ class DatasetDetailScreen extends ConsumerWidget {
     final detailAsync = ref.watch(datasetDetailProvider(id));
 
     return detailAsync.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Učitavanje...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Učitavanje...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
@@ -38,18 +43,26 @@ class DatasetDetailScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Nije moguće učitati skup podataka.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   err.toString(),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -76,38 +89,94 @@ class _DatasetDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(dataset.title, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 16),
+          Text(
+            dataset.title,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          if (dataset.lastUpdate != null || dataset.lastModified != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              _formatLastUpdate(dataset.lastUpdate ?? dataset.lastModified),
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
+          if (dataset.publisherName != null) ...[
+            Text(
+              'Izdavač',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              dataset.publisherName!,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
           if (dataset.description != null &&
               dataset.description!.trim().isNotEmpty) ...[
             Text(
-              dataset.description!.trim(),
-              style: Theme.of(context).textTheme.bodyLarge,
+              'Opis',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
             ),
-            const SizedBox(height: 16),
-          ],
-          if (dataset.publisherName != null) ...[
-            _DetailRow(label: 'Izdavač', value: dataset.publisherName!),
             const SizedBox(height: 8),
+            Text(
+              dataset.description!.trim(),
+              style: textTheme.bodyLarge?.copyWith(
+                height: 1.5,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
           if (dataset.frequency != null && dataset.frequency!.isNotEmpty) ...[
-            _DetailRow(
-              label: 'Učestalost ažuriranja',
-              value: dataset.frequency!,
+            Text(
+              'Učestalost ažuriranja',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            Text(
+              dataset.frequency!,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
           if (dataset.resources.isNotEmpty) ...[
             Text(
-              'Resursi za preuzimanje',
-              style: Theme.of(context).textTheme.titleMedium,
+              'Resursi za preuzimanje (${dataset.resources.length})',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             ...dataset.resources.map(
               (r) =>
                   _ResourceTile(title: r.title, format: r.format, url: r.url),
@@ -117,31 +186,29 @@ class _DatasetDetailContent extends StatelessWidget {
       ),
     );
   }
-}
 
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 140,
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Expanded(child: Text(value)),
-      ],
-    );
+  static String _formatLastUpdate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return 'Ažurirano: $raw';
+    const months = [
+      'januar',
+      'februar',
+      'mart',
+      'april',
+      'maj',
+      'jun',
+      'jul',
+      'avgust',
+      'septembar',
+      'oktobar',
+      'novembar',
+      'decembar',
+    ];
+    final month = parsed.month >= 1 && parsed.month <= 12
+        ? months[parsed.month - 1]
+        : '${parsed.month}.';
+    return 'Ažurirano ${parsed.day}. $month ${parsed.year}.';
   }
 }
 
@@ -165,14 +232,32 @@ class _ResourceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        title: Text(title),
+        title: Text(
+          title,
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.primary,
+          ),
+        ),
         subtitle: format != null && format!.isNotEmpty
-            ? Text(format!.toUpperCase())
+            ? Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  format!.toUpperCase(),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              )
             : null,
-        trailing: const Icon(Icons.download),
+        trailing: Icon(Icons.download, color: colorScheme.primary),
         onTap: () => _openUrl(context),
       ),
     );

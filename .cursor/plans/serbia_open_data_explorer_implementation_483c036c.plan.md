@@ -113,7 +113,7 @@ todos:
     status: completed
   - id: todo-1771847498549-59s7inicr
     content: "Detail screen need changes: all text is the same size and style at the moment which makes it hard to read. Improve typography drastically! Don't start until I attach the image in the chat of how they did solve it on the web!"
-    status: pending
+    status: completed
 isProject: false
 ---
 
