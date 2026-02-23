@@ -27,14 +27,20 @@ class DataGovRsApiClient {
   }) async {
     final params = <String, String>{};
     if (query != null && query.isNotEmpty) params['q'] = query;
-    if (organization != null && organization.isNotEmpty) params['organization'] = organization;
+    if (organization != null && organization.isNotEmpty) {
+      params['organization'] = organization;
+    }
     if (license != null && license.isNotEmpty) params['license'] = license;
-    if (frequency != null && frequency.isNotEmpty) params['frequency'] = frequency;
+    if (frequency != null && frequency.isNotEmpty) {
+      params['frequency'] = frequency;
+    }
     if (format != null && format.isNotEmpty) params['format'] = format;
     if (page != null) params['page'] = page.toString();
     if (limit != null) params['page_size'] = limit.toString();
 
-    final uri = Uri.parse('${_base}datasets/').replace(queryParameters: params.isEmpty ? null : params);
+    final uri = Uri.parse(
+      '${_base}datasets/',
+    ).replace(queryParameters: params.isEmpty ? null : params);
     final response = await http.get(uri);
 
     if (response.statusCode != 200) {
@@ -59,6 +65,8 @@ class DataGovRsApiClient {
   }
 
   Exception _apiException(int statusCode, String body) {
-    return Exception('API error $statusCode: ${body.length > 200 ? body.substring(0, 200) : body}');
+    return Exception(
+      'API error $statusCode: ${body.length > 200 ? body.substring(0, 200) : body}',
+    );
   }
 }

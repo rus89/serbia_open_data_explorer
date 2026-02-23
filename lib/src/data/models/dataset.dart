@@ -115,7 +115,8 @@ class Dataset {
       frequencyDate: json['frequency_date'] as String?,
       lastModified: json['last_modified'] as String?,
       lastUpdate: json['last_update'] as String?,
-      resources: resourcesJson
+      resources:
+          resourcesJson
               ?.map((e) => DatasetResource.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -152,7 +153,8 @@ class DatasetListResponse {
   static DatasetListResponse fromJson(Map<String, dynamic> json) {
     final dataJson = json['data'] as List<dynamic>?;
     return DatasetListResponse(
-      data: dataJson
+      data:
+          dataJson
               ?.map((e) => Dataset.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],

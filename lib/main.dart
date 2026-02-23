@@ -7,11 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'src/routing/app_router.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: SerbiaOpenDataExplorerApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: SerbiaOpenDataExplorerApp()));
 }
 
 class SerbiaOpenDataExplorerApp extends StatelessWidget {

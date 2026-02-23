@@ -69,15 +69,16 @@ class DatasetSearchParamsNotifier extends Notifier<DatasetSearchParams> {
 
 final datasetSearchParamsProvider =
     NotifierProvider<DatasetSearchParamsNotifier, DatasetSearchParams>(
-  DatasetSearchParamsNotifier.new,
-);
+      DatasetSearchParamsNotifier.new,
+    );
 
 final dataGovRsApiClientProvider = Provider<DataGovRsApiClient>((ref) {
   return DataGovRsApiClient(baseUrl: _defaultBaseUrl);
 });
 
-final datasetSearchResultsProvider =
-    FutureProvider<DatasetListResponse>((ref) async {
+final datasetSearchResultsProvider = FutureProvider<DatasetListResponse>((
+  ref,
+) async {
   final client = ref.watch(dataGovRsApiClientProvider);
   final params = ref.watch(datasetSearchParamsProvider);
   return client.searchDatasets(

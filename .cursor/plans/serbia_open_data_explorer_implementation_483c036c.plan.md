@@ -90,7 +90,15 @@ todos:
     content: Run flutter test; all pass; maintain coverage (e.g. ≥80%) if required
     status: pending
   - id: todo-1771772214603-e7nh6fe5l
-    content: Update `README.md` to represent this project in its best way
+    content: |-
+      Update `README.md`. Replace generic Flutter content with:
+
+      - Project description
+      - Run: flutter run
+      - Test: flutter test / flutter test --exclude-tags=integration
+      - Analyze: flutter analyze
+      - Hook setup: git config core.hooksPath .githooks
+      - API: https://data.gov.rs/api/1/
     status: pending
 isProject: false
 ---
