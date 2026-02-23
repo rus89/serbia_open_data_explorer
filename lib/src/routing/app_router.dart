@@ -433,6 +433,15 @@ class _DatasetListView extends ConsumerWidget {
   }
 }
 
+/// Resolves organization logo URL: relative paths get data.gov.rs origin.
+String? _resolveLogoUrl(String? url) {
+  if (url == null || url.trim().isEmpty) return null;
+  final t = url.trim();
+  if (t.startsWith('http://') || t.startsWith('https://')) return t;
+  if (t.startsWith('/')) return 'https://data.gov.rs$t';
+  return 'https://data.gov.rs/$t';
+}
+
 /// Single dataset row: title, description snippet, organization and format chips.
 class _DatasetListTile extends StatelessWidget {
   const _DatasetListTile({required this.dataset, required this.onTap});
@@ -454,6 +463,9 @@ class _DatasetListTile extends StatelessWidget {
         .toSet()
         .take(5)
         .toList();
+    final logoUrl = _resolveLogoUrl(
+      dataset.organization?.logoThumbnail ?? dataset.organization?.logo,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -465,19 +477,7 @@ class _DatasetListTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.dataset_outlined,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 24,
-                ),
-              ),
+              _DatasetListTileIcon(logoUrl: logoUrl, colorScheme: colorScheme),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -534,6 +534,51 @@ class _DatasetListTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Shows organization logo from API when [logoUrl] is set; otherwise placeholder icon.
+class _DatasetListTileIcon extends StatelessWidget {
+  const _DatasetListTileIcon({
+    required this.logoUrl,
+    required this.colorScheme,
+  });
+
+  final String? logoUrl;
+  final ColorScheme colorScheme;
+
+  static const double _size = 44;
+
+  Widget _placeholder() => Center(
+    child: Icon(
+      Icons.dataset_outlined,
+      color: colorScheme.onPrimaryContainer,
+      size: 24,
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _size,
+      height: _size,
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: logoUrl != null
+          ? Image.network(
+              logoUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => _placeholder(),
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return _placeholder();
+              },
+            )
+          : _placeholder(),
     );
   }
 }

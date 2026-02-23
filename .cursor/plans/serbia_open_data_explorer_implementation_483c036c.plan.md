@@ -125,6 +125,12 @@ todos:
   - id: todo-1771857254951-o8n0nc5rn
     content: even if it says that there are over 3000 datasets, it shows just a bunch of them on the homepage, and when the user get to the bottom (last one), no more datasets are loaded in view!
     status: pending
+  - id: todo-1771857482077-ncxmfj2gt
+    content: do analyze website https://data.gov.rs/sr/datasets/ which is actually a web presentation of what I want to achieve with this app. let's see what can be used from the website, which would be usefull for the app users.
+    status: pending
+  - id: todo-1771857570310-hqul1v0r6
+    content: ""
+    status: pending
 isProject: false
 ---
 
