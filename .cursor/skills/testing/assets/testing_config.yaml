@@ -2,11 +2,8 @@ types:
   - unit
   - widget
   - integration
-  - golden
 tools:
   - flutter_test
-  - mockito
-  - bloc_test
 coverage:
   target: 80
   excluded:

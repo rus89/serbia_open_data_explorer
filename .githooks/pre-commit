@@ -1,8 +1,7 @@
 #!/bin/bash
+# ABOUTME: Git pre-commit hook that enforces code analysis and formatting.
+# ABOUTME: Blocks commits if flutter analyze fails or code is not formatted.
+set -e
+
 flutter analyze
-dart format .
-# Exit with a non-zero status if the checks fail to prevent the commit
-if [ $? -ne 0 ]; then
-  echo "Git hook failed due to analysis/formatting issues. Please fix them before committing."
-  exit 1
-fi
+dart format --output=none --set-exit-if-changed .
