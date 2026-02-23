@@ -127,10 +127,19 @@ todos:
     status: completed
   - id: todo-1771857482077-ncxmfj2gt
     content: do analyze website https://data.gov.rs/sr/datasets/ which is actually a web presentation of what I want to achieve with this app. let's see what else can be used from the website, which would be usefull for the app users to add. let's see if we need to update plan!
-    status: pending
+    status: completed
   - id: todo-1771857570310-hqul1v0r6
     content: search filter doesn't work at all. no matter if I type latin or cyrilic (because there are datasets in both of those fonts) nothings shows. I would love to filter while typing!
     status: completed
+  - id: todo-1771860549114-o47yxvxdq
+    content: "“Open on portal: Add a button or link (e.g. „Otvoriti na portalu” / „Pogledaj na data.gov.rs”) that opens dataset.page in the browser via url_launcher, so users can reach discussions, reuses, and participate on the portal.”"
+    status: pending
+  - id: todo-1771860555413-vxd95ql7w
+    content: "“Add sort control: default sort by last update (newest first), e.g. API sort=-last_update; optionally allow sort by reuses/followers if API supports it”."
+    status: in_progress
+  - id: todo-1771860662653-7wdhqs346
+    content: "“Sort: pass sort to the list API (e.g. -last_update as default to align with portal); expose sort choice in UI (e.g. dropdown or chips).”"
+    status: pending
 isProject: false
 ---
 
@@ -253,12 +262,13 @@ isProject: false
 
 ## Phase 4: Catalog UI (search and filters)
 
-**Goal:** Home screen: search input, filters (organization, license, frequency, format), and list of datasets.
+**Goal:** Home screen: search input, filters (organization, license, frequency, format, optionally topic), sort option, and list of datasets.
 
 **Tasks:**
 
 - Add search text field wired to search query provider (debounced or on submit)
-- Add filter dropdowns/chips for organization, license, frequency, format
+- Add filter dropdowns/chips for organization, license, frequency, format (and optionally topic; see doc/WEBSITE_ANALYSIS.md)
+- Add sort control: default sort by last update (newest first), e.g. API `sort=-last_update`; optionally allow sort by reuses/followers if API supports it
 - Build dataset list view with loading, error, empty, success states
 - On list item tap, navigate to detail using route constant
 - Add SnackBar/inline error and loading handling; check `mounted` after async
@@ -266,8 +276,9 @@ isProject: false
 1. **Search and filter UI**
 
 - Search: text field that updates `datasetSearchQueryProvider` (or a notifier) on submit or debounced.
-- Filters: dropdowns or chips for organization, license, frequency, format. Options can be loaded from the API (if list endpoints exist) or from a fixed list derived from discovery. Filter state in Riverpod (same or separate providers as in Phase 2).
+- Filters: dropdowns or chips for organization, license, frequency, format. Options can be loaded from the API (if list endpoints exist) or from a fixed list derived from discovery. Filter state in Riverpod (same or separate providers as in Phase 2). Optionally add topic filter (API param `topic`; topic list from API or fixed list per discovery).
 - Connect filter state to `datasetSearchResultsProvider` so changing filters refetches.
+- Sort: pass `sort` to the list API (e.g. `-last_update` as default to align with portal); expose sort choice in UI (e.g. dropdown or chips).
 
 1. **Dataset list**
 
@@ -277,24 +288,26 @@ isProject: false
 
 - Use try/catch and Riverpod async states; show user-friendly messages (SnackBar or inline). Check `mounted` after async before using `context` (per Flutter skill).
 
-**Deliverables:** Home screen with working search, filters, and list; navigation to detail by id.
+**Deliverables:** Home screen with working search, filters, sort, and list; navigation to detail by id.
 
 ---
 
 ## Phase 5: Dataset detail screen
 
-**Goal:** Detail page shows description, publisher, update frequency, and download links.
+**Goal:** Detail page shows description, publisher, update frequency, download links, link to portal, and (optionally) reuses count.
 
 1. **Detail screen**
 
 - Route reads `:id` from path, uses `datasetDetailProvider(id)`.
 - Display: full description, publisher, update frequency, list of resources (name + format + download link). Use `url_launcher` (or platform link handling) for download links.
+- **Open on portal:** Add a button or link (e.g. „Otvoriti na portalu” / „Pogledaj na data.gov.rs”) that opens `dataset.page` in the browser via `url_launcher`, so users can reach discussions, reuses, and participate on the portal.
+- **Reuses (optional):** Show number of „Primeri upotrebe” from `dataset.metrics.reuses` when available; optionally link to portal or a future reuses screen.
 
 1. **States**
 
 - Loading, error, and success; no use of `context` after async without `mounted` check.
 
-**Deliverables:** Detail screen with all required fields and working download links.
+**Deliverables:** Detail screen with all required fields, working download links, and link to open the dataset on the portal; optionally reuses count.
 
 ---
 
