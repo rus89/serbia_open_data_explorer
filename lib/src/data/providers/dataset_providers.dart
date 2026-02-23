@@ -1,5 +1,5 @@
 // ABOUTME: Riverpod providers for data.gov.rs API client and dataset search/detail.
-// ABOUTME: Exposes dataGovRsApiClientProvider, datasetSearchResultsProvider, datasetDetailProvider.
+// ABOUTME: Exposes dataGovRsApiClientProvider, datasetSearchResultsProvider, datasetSearchStateProvider, datasetDetailProvider.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -171,6 +171,123 @@ final datasetSearchResultsProvider = FutureProvider<DatasetListResponse>((
     limit: params.limit,
   );
 });
+
+/// Accumulated list state for infinite scroll: items loaded so far, total count, pagination flags.
+class DatasetSearchState {
+  const DatasetSearchState({
+    this.items = const [],
+    this.total = 0,
+    this.currentPage = 0,
+    this.hasMore = false,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.error,
+  });
+
+  final List<Dataset> items;
+  final int total;
+  final int currentPage;
+  final bool hasMore;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final Object? error;
+
+  DatasetSearchState copyWith({
+    List<Dataset>? items,
+    int? total,
+    int? currentPage,
+    bool? hasMore,
+    bool? isLoading,
+    bool? isLoadingMore,
+    Object? error,
+  }) {
+    return DatasetSearchState(
+      items: items ?? this.items,
+      total: total ?? this.total,
+      currentPage: currentPage ?? this.currentPage,
+      hasMore: hasMore ?? this.hasMore,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      error: error,
+    );
+  }
+}
+
+/// Holds accumulated dataset list for catalog; supports loadFirst (reset + page 1) and loadMore (append next page).
+class DatasetSearchStateNotifier extends Notifier<DatasetSearchState> {
+  @override
+  DatasetSearchState build() => const DatasetSearchState();
+
+  /// Loads first page with current search params and replaces list. Call when query/filters change or retry.
+  Future<void> loadFirst() async {
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      items: [],
+      total: 0,
+      currentPage: 0,
+      hasMore: false,
+    );
+    final client = ref.read(dataGovRsApiClientProvider);
+    final params = ref.read(datasetSearchParamsProvider);
+    try {
+      final response = await client.searchDatasets(
+        query: params.query.isEmpty ? null : params.query,
+        organization: params.organization,
+        license: params.license,
+        frequency: params.frequency,
+        format: params.format,
+        page: 1,
+        limit: params.limit,
+      );
+      state = state.copyWith(
+        items: response.data,
+        total: response.total,
+        currentPage: 1,
+        hasMore: response.nextPage != null && response.nextPage!.isNotEmpty,
+        isLoading: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e);
+    }
+  }
+
+  /// Appends next page to list. No-op if no more pages or already loading more.
+  Future<void> loadMore() async {
+    if (!state.hasMore || state.isLoadingMore) return;
+    state = state.copyWith(isLoadingMore: true, error: null);
+    final client = ref.read(dataGovRsApiClientProvider);
+    final params = ref.read(datasetSearchParamsProvider);
+    final nextPage = state.currentPage + 1;
+    try {
+      final response = await client.searchDatasets(
+        query: params.query.isEmpty ? null : params.query,
+        organization: params.organization,
+        license: params.license,
+        frequency: params.frequency,
+        format: params.format,
+        page: nextPage,
+        limit: params.limit,
+      );
+      final newItems = [...state.items, ...response.data];
+      state = state.copyWith(
+        items: newItems,
+        currentPage: nextPage,
+        hasMore: response.nextPage != null && response.nextPage!.isNotEmpty,
+        isLoadingMore: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoadingMore: false, error: e);
+    }
+  }
+}
+
+final datasetSearchStateProvider =
+    NotifierProvider<DatasetSearchStateNotifier, DatasetSearchState>(
+      DatasetSearchStateNotifier.new,
+    );
 
 final datasetDetailProvider = FutureProvider.family<Dataset, String>((ref, id) {
   final client = ref.watch(dataGovRsApiClientProvider);

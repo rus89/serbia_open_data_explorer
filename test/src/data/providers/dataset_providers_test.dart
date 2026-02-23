@@ -1,5 +1,5 @@
 // ABOUTME: Tests for dataset Riverpod providers. Uses real API; no mocks (per plan and GlobalRules).
-// ABOUTME: Covers dataGovRsApiClientProvider, datasetSearchResultsProvider, datasetDetailProvider.
+// ABOUTME: Covers dataGovRsApiClientProvider, datasetSearchResultsProvider, datasetSearchStateProvider, datasetDetailProvider.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -119,6 +119,39 @@ void main() {
       expect(params.format, isNull);
       expect(params.page, 1);
     });
+  });
+
+  group('datasetSearchStateProvider', () {
+    test(
+      'loadFirst loads first page; loadMore appends next page',
+      () async {
+        container
+            .read(datasetSearchParamsProvider.notifier)
+            .updateParams(const DatasetSearchParams(page: 1, limit: 5));
+        final notifier = container.read(datasetSearchStateProvider.notifier);
+
+        await notifier.loadFirst();
+
+        final afterFirst = container.read(datasetSearchStateProvider);
+        expect(afterFirst.items, isA<List<Dataset>>());
+        expect(afterFirst.total, greaterThanOrEqualTo(0));
+        expect(afterFirst.currentPage, 1);
+        expect(afterFirst.isLoading, isFalse);
+        expect(afterFirst.error, isNull);
+        if (afterFirst.total <= 5) return;
+
+        expect(afterFirst.hasMore, isTrue);
+        final countAfterFirst = afterFirst.items.length;
+
+        await notifier.loadMore();
+
+        final afterMore = container.read(datasetSearchStateProvider);
+        expect(afterMore.items.length, greaterThan(countAfterFirst));
+        expect(afterMore.currentPage, 2);
+        expect(afterMore.total, afterFirst.total);
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
   });
 
   group('datasetDetailProvider', () {

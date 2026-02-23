@@ -268,42 +268,93 @@ String _totalCountLabel(int total) {
   return 'Ukupno: $total skupova podataka';
 }
 
-/// List view for search results: loading, error, empty, and success states.
-class _DatasetListView extends ConsumerWidget {
+/// List view for search results: loading, error, empty, success, and load-more at bottom.
+class _DatasetListView extends ConsumerStatefulWidget {
   const _DatasetListView();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<AsyncValue<DatasetListResponse>>(datasetSearchResultsProvider, (
-      prev,
-      next,
-    ) {
-      next.whenOrNull(
-        error: (err, stack) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(
-                  'Nije moguće učitati skupove podataka. Pokušajte ponovo.',
-                ),
-                action: SnackBarAction(
-                  label: 'Ponovo',
-                  onPressed: () => ref.invalidate(datasetSearchResultsProvider),
-                ),
-              ),
-            );
-          }
-        },
-      );
+  ConsumerState<_DatasetListView> createState() => _DatasetListViewState();
+}
+
+class _DatasetListViewState extends ConsumerState<_DatasetListView> {
+  static const double _loadMoreTriggerExtent = 200;
+
+  final ScrollController _scrollController = ScrollController();
+  DatasetSearchParams? _lastParams;
+  bool _initialLoadTriggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _initialLoadTriggered = true;
+      ref.read(datasetSearchStateProvider.notifier).loadFirst();
+    });
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final notifier = ref.read(datasetSearchStateProvider.notifier);
+    final state = ref.read(datasetSearchStateProvider);
+    if (!state.hasMore || state.isLoadingMore) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - _loadMoreTriggerExtent) {
+      notifier.loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final params = ref.watch(datasetSearchParamsProvider);
+    if (_lastParams != null &&
+        (_lastParams!.query != params.query ||
+            _lastParams!.organization != params.organization ||
+            _lastParams!.license != params.license ||
+            _lastParams!.frequency != params.frequency ||
+            _lastParams!.format != params.format)) {
+      _lastParams = params;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(datasetSearchStateProvider.notifier).loadFirst();
+      });
+    } else {
+      _lastParams = params;
+    }
+
+    ref.listen<DatasetSearchState>(datasetSearchStateProvider, (prev, next) {
+      if (prev?.error != next.error && next.error != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Nije moguće učitati skupove podataka. Pokušajte ponovo.',
+            ),
+            action: SnackBarAction(
+              label: 'Ponovo',
+              onPressed: () =>
+                  ref.read(datasetSearchStateProvider.notifier).loadFirst(),
+            ),
+          ),
+        );
+      }
     });
 
-    final resultsAsync = ref.watch(datasetSearchResultsProvider);
-
+    final searchState = ref.watch(datasetSearchStateProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return resultsAsync.when(
-      loading: () => Center(
+    final showInitialLoading =
+        searchState.items.isEmpty &&
+        (searchState.isLoading || !_initialLoadTriggered);
+    if (showInitialLoading) {
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -324,8 +375,11 @@ class _DatasetListView extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-      error: (err, stack) => Center(
+      );
+    }
+
+    if (searchState.error != null && searchState.items.isEmpty) {
+      return Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -348,7 +402,7 @@ class _DatasetListView extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  err.toString(),
+                  searchState.error.toString(),
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
@@ -358,7 +412,8 @@ class _DatasetListView extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
-                  onPressed: () => ref.invalidate(datasetSearchResultsProvider),
+                  onPressed: () =>
+                      ref.read(datasetSearchStateProvider.notifier).loadFirst(),
                   icon: const Icon(Icons.refresh, size: 20),
                   label: const Text('Pokušaj ponovo'),
                 ),
@@ -366,69 +421,86 @@ class _DatasetListView extends ConsumerWidget {
             ),
           ),
         ),
-      ),
-      data: (response) {
-        final totalLabel = _totalCountLabel(response.total);
-        final content = response.data.isEmpty
-            ? Center(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.search_off,
-                        size: 56,
-                        color: colorScheme.outline,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Nema pronađenih skupova podataka.',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Promenite pretragu ili filtere.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+      );
+    }
+
+    final totalLabel = _totalCountLabel(searchState.total);
+    final Widget content;
+    if (searchState.items.isEmpty) {
+      content = Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.search_off, size: 56, color: colorScheme.outline),
+              const SizedBox(height: 20),
+              Text(
+                'Nema pronađenih skupova podataka.',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 24),
-                itemCount: response.data.length,
-                itemBuilder: (context, index) {
-                  final dataset = response.data[index];
-                  return _DatasetListTile(
-                    dataset: dataset,
-                    onTap: () =>
-                        context.push(AppRoutes.datasetDetailPath(dataset.id)),
-                  );
-                },
-              );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                totalLabel,
-                style: theme.textTheme.labelMedium?.copyWith(
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Promenite pretragu ili filtere.',
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
+                textAlign: TextAlign.center,
               ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      final itemCount =
+          searchState.items.length +
+          (searchState.hasMore && searchState.isLoadingMore ? 1 : 0);
+      content = ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.only(bottom: 24),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          if (index >= searchState.items.length) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
+            );
+          }
+          final dataset = searchState.items[index];
+          return _DatasetListTile(
+            dataset: dataset,
+            onTap: () => context.push(AppRoutes.datasetDetailPath(dataset.id)),
+          );
+        },
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text(
+            totalLabel,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
-            Expanded(child: content),
-          ],
-        );
-      },
+          ),
+        ),
+        Expanded(child: content),
+      ],
     );
   }
 }
