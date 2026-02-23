@@ -70,16 +70,16 @@ todos:
     status: completed
   - id: phase5-detail-content
     content: Display description, publisher, update frequency, resources list
-    status: pending
+    status: completed
   - id: phase5-download-links
     content: Add url_launcher (or platform link handling) for resource download links
-    status: pending
+    status: completed
   - id: phase5-states
     content: Handle loading, error, success; no context use after async without mounted check
-    status: pending
+    status: completed
   - id: phase6-data-tests
     content: Ensure data layer tests cover search, getById, error handling (real API or fixtures)
-    status: pending
+    status: completed
   - id: phase6-widget-test
     content: Add widget or integration test for app → list → detail flow
     status: pending

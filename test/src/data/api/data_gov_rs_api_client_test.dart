@@ -86,5 +86,19 @@ void main() {
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
+
+    test(
+      'searchDatasets throws when server returns non-200',
+      () async {
+        final badClient = DataGovRsApiClient(
+          baseUrl: 'https://data.gov.rs/api/1/nonexistent-path-xyz/',
+        );
+        expect(
+          badClient.searchDatasets(page: 1, limit: 1),
+          throwsA(predicate<Exception>((e) => e.toString().contains('404'))),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
   });
 }
