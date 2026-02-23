@@ -1,6 +1,8 @@
 // ABOUTME: GoRouter configuration with home and dataset detail routes.
 // ABOUTME: Uses AppRoutes for paths; ShellRoute provides shared scaffold and app bar.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,15 +59,44 @@ class _HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<_HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 350);
+  Timer? _searchDebounce;
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onSearchSubmitted(String value) {
+  void _applySearchQuery(String value) {
     ref.read(datasetSearchParamsProvider.notifier).setQuery(value.trim());
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {});
+    _searchDebounce?.cancel();
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      _applySearchQuery('');
+      return;
+    }
+    _searchDebounce = Timer(_searchDebounceDuration, () {
+      if (!mounted) return;
+      _applySearchQuery(_searchController.text);
+    });
+  }
+
+  void _onSearchSubmitted(String value) {
+    _searchDebounce?.cancel();
+    _applySearchQuery(value.trim());
+  }
+
+  void _clearSearch() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    _applySearchQuery('');
+    setState(() {});
   }
 
   @override
@@ -89,16 +120,13 @@ class _HomeScreenState extends ConsumerState<_HomeScreen> {
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        paramsNotifier.setQuery('');
-                      },
+                      onPressed: _clearSearch,
                     )
                   : null,
             ),
             textInputAction: TextInputAction.search,
             onSubmitted: _onSearchSubmitted,
-            onChanged: (_) => setState(() {}),
+            onChanged: _onSearchChanged,
           ),
           const SizedBox(height: 12),
           _FilterSection(

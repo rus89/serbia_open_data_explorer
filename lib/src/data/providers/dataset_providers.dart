@@ -9,6 +9,18 @@ import '../models/filter_options.dart';
 
 const _defaultBaseUrl = 'https://data.gov.rs/api/1/';
 
+/// Min query length to trigger partial-match fallback when API returns 0 (backend does whole-word match).
+const _partialMatchMinLength = 2;
+
+/// Page size for fallback request when we filter client-side by substring.
+const _partialMatchFallbackPageSize = 200;
+
+bool _datasetMatchesQuery(Dataset d, String queryLower) {
+  if (d.title.toLowerCase().contains(queryLower)) return true;
+  final desc = d.description ?? '';
+  return desc.toLowerCase().contains(queryLower);
+}
+
 /// Search parameters for dataset list (query, filters, pagination).
 class DatasetSearchParams {
   const DatasetSearchParams({
@@ -219,6 +231,7 @@ class DatasetSearchStateNotifier extends Notifier<DatasetSearchState> {
   DatasetSearchState build() => const DatasetSearchState();
 
   /// Loads first page with current search params and replaces list. Call when query/filters change or retry.
+  /// When API returns 0 for a short query (backend does whole-word match), tries one page without q and filters client-side by substring.
   Future<void> loadFirst() async {
     state = state.copyWith(
       isLoading: true,
@@ -240,11 +253,34 @@ class DatasetSearchStateNotifier extends Notifier<DatasetSearchState> {
         page: 1,
         limit: params.limit,
       );
+      var items = response.data;
+      var total = response.total;
+      var hasMore = response.nextPage != null && response.nextPage!.isNotEmpty;
+      final queryTrimmed = params.query.trim();
+      if (items.isEmpty &&
+          total == 0 &&
+          queryTrimmed.length >= _partialMatchMinLength) {
+        final fallback = await client.searchDatasets(
+          query: null,
+          organization: params.organization,
+          license: params.license,
+          frequency: params.frequency,
+          format: params.format,
+          page: 1,
+          limit: _partialMatchFallbackPageSize,
+        );
+        final queryLower = queryTrimmed.toLowerCase();
+        items = fallback.data
+            .where((d) => _datasetMatchesQuery(d, queryLower))
+            .toList();
+        total = items.length;
+        hasMore = false;
+      }
       state = state.copyWith(
-        items: response.data,
-        total: response.total,
+        items: items,
+        total: total,
         currentPage: 1,
-        hasMore: response.nextPage != null && response.nextPage!.isNotEmpty,
+        hasMore: hasMore,
         isLoading: false,
         error: null,
       );

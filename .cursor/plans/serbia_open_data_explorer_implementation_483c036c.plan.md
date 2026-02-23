@@ -126,11 +126,11 @@ todos:
     content: even if it says that there are over 3000 datasets, it shows just a bunch of them on the homepage, and when the user get to the bottom (last one), no more datasets are loaded in view!
     status: completed
   - id: todo-1771857482077-ncxmfj2gt
-    content: do analyze website https://data.gov.rs/sr/datasets/ which is actually a web presentation of what I want to achieve with this app. let's see what can be used from the website, which would be usefull for the app users.
+    content: do analyze website https://data.gov.rs/sr/datasets/ which is actually a web presentation of what I want to achieve with this app. let's see what else can be used from the website, which would be usefull for the app users to add. let's see if we need to update plan!
     status: pending
   - id: todo-1771857570310-hqul1v0r6
     content: search filter doesn't work at all. no matter if I type latin or cyrilic (because there are datasets in both of those fonts) nothings shows. I would love to filter while typing!
-    status: pending
+    status: completed
 isProject: false
 ---
 
