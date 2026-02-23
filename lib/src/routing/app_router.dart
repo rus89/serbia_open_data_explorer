@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../data/models/dataset.dart';
 import '../data/models/filter_options.dart';
 import '../data/providers/dataset_providers.dart';
+import '../presentation/dataset_detail_screen.dart';
 import 'app_routes.dart';
 
 /// Configures GoRouter with home (/) and dataset detail (/dataset/:id) routes.
@@ -29,7 +30,7 @@ GoRouter createAppRouter() {
             path: AppRoutes.datasetDetail,
             builder: (context, state) {
               final id = state.pathParameters['id'] ?? '';
-              return _PlaceholderDetailScreen(id: id);
+              return DatasetDetailScreen(id: id);
             },
           ),
         ],
@@ -407,16 +408,5 @@ class _DatasetListTile extends StatelessWidget {
         onTap: onTap,
       ),
     );
-  }
-}
-
-class _PlaceholderDetailScreen extends StatelessWidget {
-  const _PlaceholderDetailScreen({required this.id});
-
-  final String id;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Skup podataka: $id'));
   }
 }

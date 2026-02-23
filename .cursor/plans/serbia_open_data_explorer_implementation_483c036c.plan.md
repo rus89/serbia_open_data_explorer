@@ -67,7 +67,7 @@ todos:
     status: completed
   - id: phase5-detail-screen
     content: Create detail screen reading :id from path and datasetDetailProvider(id)
-    status: pending
+    status: completed
   - id: phase5-detail-content
     content: Display description, publisher, update frequency, resources list
     status: pending
