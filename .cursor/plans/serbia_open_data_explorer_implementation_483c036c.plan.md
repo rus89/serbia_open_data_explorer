@@ -61,10 +61,10 @@ todos:
     status: completed
   - id: phase4-list-navigation
     content: On list item tap, navigate to detail using route constant
-    status: pending
+    status: completed
   - id: phase4-error-loading
     content: Add SnackBar/inline error and loading handling; check mounted after async
-    status: pending
+    status: completed
   - id: phase5-detail-screen
     content: Create detail screen reading :id from path and datasetDetailProvider(id)
     status: pending

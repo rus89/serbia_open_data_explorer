@@ -211,10 +211,42 @@ class _DatasetListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<DatasetListResponse>>(datasetSearchResultsProvider, (
+      prev,
+      next,
+    ) {
+      next.whenOrNull(
+        error: (err, stack) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text(
+                  'Nije moguće učitati skupove podataka. Pokušajte ponovo.',
+                ),
+                action: SnackBarAction(
+                  label: 'Ponovo',
+                  onPressed: () => ref.invalidate(datasetSearchResultsProvider),
+                ),
+              ),
+            );
+          }
+        },
+      );
+    });
+
     final resultsAsync = ref.watch(datasetSearchResultsProvider);
 
     return resultsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Učitavanje...'),
+          ],
+        ),
+      ),
       error: (err, stack) => Center(
         child: SingleChildScrollView(
           child: Padding(
