@@ -114,6 +114,10 @@ class DatasetSearchParamsNotifier extends Notifier<DatasetSearchParams> {
   void setPage(int page) {
     state = state.copyWith(page: page);
   }
+
+  void resetFilters() {
+    state = const DatasetSearchParams();
+  }
 }
 
 final datasetSearchParamsProvider =

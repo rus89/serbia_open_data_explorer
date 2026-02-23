@@ -102,6 +102,25 @@ void main() {
     }, timeout: const Timeout(Duration(seconds: 30)));
   });
 
+  group('DatasetSearchParamsNotifier', () {
+    test('resetFilters restores default params', () {
+      final notifier = container.read(datasetSearchParamsProvider.notifier);
+      notifier.setQuery('test');
+      notifier.setOrganization('org-1');
+      notifier.setLicense('lic-1');
+      notifier.setFormat('csv');
+
+      notifier.resetFilters();
+
+      final params = container.read(datasetSearchParamsProvider);
+      expect(params.query, '');
+      expect(params.organization, isNull);
+      expect(params.license, isNull);
+      expect(params.format, isNull);
+      expect(params.page, 1);
+    });
+  });
+
   group('datasetDetailProvider', () {
     test(
       'returns dataset when id exists',

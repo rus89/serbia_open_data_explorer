@@ -92,7 +92,6 @@ todos:
   - id: todo-1771772214603-e7nh6fe5l
     content: |-
       Update `README.md`. Replace generic Flutter content with:
-
       - Project description
       - Run: flutter run
       - Test: flutter test / flutter test --exclude-tags=integration
@@ -111,9 +110,9 @@ todos:
     status: completed
   - id: todo-1771846767247-cft10q4s2
     content: Add a button to reset all filters in the app!
-    status: pending
+    status: completed
   - id: todo-1771847498549-59s7inicr
-    content: "Detail screen need changes: all text is the same size and style at the moment which makes it hard to read. Improve typography drastically!"
+    content: "Detail screen need changes: all text is the same size and style at the moment which makes it hard to read. Improve typography drastically! Don't start until I attach the image in the chat of how they did solve it on the web!"
     status: pending
 isProject: false
 ---

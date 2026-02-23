@@ -89,6 +89,10 @@ class _HomeScreenState extends ConsumerState<_HomeScreen> {
             licensesAsync: licensesAsync,
             frequenciesAsync: frequenciesAsync,
             organizationsAsync: organizationsAsync,
+            onReset: () {
+              _searchController.clear();
+              paramsNotifier.resetFilters();
+            },
           ),
           const SizedBox(height: 16),
           Expanded(child: _DatasetListView()),
@@ -106,6 +110,7 @@ class _FilterSection extends StatelessWidget {
     required this.licensesAsync,
     required this.frequenciesAsync,
     required this.organizationsAsync,
+    required this.onReset,
   });
 
   final DatasetSearchParams params;
@@ -113,12 +118,21 @@ class _FilterSection extends StatelessWidget {
   final AsyncValue<List<LicenseOption>> licensesAsync;
   final AsyncValue<List<FrequencyOption>> frequenciesAsync;
   final AsyncValue<List<OrganizationOption>> organizationsAsync;
+  final VoidCallback onReset;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: onReset,
+            icon: const Icon(Icons.filter_list_off, size: 20),
+            label: const Text('Resetuj sve filtere'),
+          ),
+        ),
         _FilterDropdown<String>(
           label: 'Organizacija',
           value: params.organization,
