@@ -98,7 +98,7 @@ todos:
       - Analyze: flutter analyze
       - Hook setup: git config core.hooksPath .githooks
       - API: https://data.gov.rs/api/1/
-    status: pending
+    status: in_progress
   - id: todo-1771844118572-yz3xizlen
     content: review and analyze all agents files and AI related files, and see the gaps that can be improved for the future development of Flutter Mobile apps.
     status: pending
@@ -114,6 +114,9 @@ todos:
   - id: todo-1771847498549-59s7inicr
     content: "Detail screen need changes: all text is the same size and style at the moment which makes it hard to read. Improve typography drastically! Don't start until I attach the image in the chat of how they did solve it on the web!"
     status: completed
+  - id: todo-1771856624002-4kgomqhcl
+    content: UI design is aweful. Want it to be nicelooking, intuitive and professional!
+    status: pending
 isProject: false
 ---
 
