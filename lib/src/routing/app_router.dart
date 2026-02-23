@@ -206,6 +206,12 @@ class _FilterDropdown<T> extends StatelessWidget {
   }
 }
 
+String _totalCountLabel(int total) {
+  if (total == 1) return 'Ukupno: 1 skup podataka';
+  if (total >= 2 && total <= 4) return 'Ukupno: $total skupa podataka';
+  return 'Ukupno: $total skupova podataka';
+}
+
 /// List view for search results: loading, error, empty, and success states.
 class _DatasetListView extends ConsumerWidget {
   const _DatasetListView();
@@ -283,47 +289,62 @@ class _DatasetListView extends ConsumerWidget {
         ),
       ),
       data: (response) {
-        if (response.data.isEmpty) {
-          return Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.outline,
+        final totalLabel = _totalCountLabel(response.total);
+        final content = response.data.isEmpty
+            ? Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.inbox_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Nema pronađenih skupova podataka.',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Promenite pretragu ili filtere.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Nema pronađenih skupova podataka.',
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Promenite pretragu ili filtere.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                ),
+              )
+            : ListView.builder(
+                itemCount: response.data.length,
+                itemBuilder: (context, index) {
+                  final dataset = response.data[index];
+                  return _DatasetListTile(
+                    dataset: dataset,
+                    onTap: () =>
+                        context.push(AppRoutes.datasetDetailPath(dataset.id)),
+                  );
+                },
+              );
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                totalLabel,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-          );
-        }
-        return ListView.builder(
-          itemCount: response.data.length,
-          itemBuilder: (context, index) {
-            final dataset = response.data[index];
-            return _DatasetListTile(
-              dataset: dataset,
-              onTap: () =>
-                  context.push(AppRoutes.datasetDetailPath(dataset.id)),
-            );
-          },
+            Expanded(child: content),
+          ],
         );
       },
     );

@@ -108,7 +108,7 @@ todos:
     status: completed
   - id: todo-1771846586147-zbp6hn8vt
     content: I want to show the total number of datasets somewhere in the app!
-    status: pending
+    status: completed
   - id: todo-1771846767247-cft10q4s2
     content: Add a button to reset all filters in the app!
     status: pending
