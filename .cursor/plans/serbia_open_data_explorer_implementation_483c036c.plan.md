@@ -85,10 +85,10 @@ todos:
     status: completed
   - id: phase6-analyze
     content: Run flutter analyze and fix until zero issues
-    status: pending
+    status: completed
   - id: phase6-test-green
     content: Run flutter test; all pass; maintain coverage (e.g. ≥80%) if required
-    status: pending
+    status: completed
   - id: todo-1771772214603-e7nh6fe5l
     content: |-
       Update `README.md`. Replace generic Flutter content with:
@@ -105,12 +105,15 @@ todos:
     status: pending
   - id: todo-1771846549324-6zya9hcmc
     content: "I noticed that the order of shown datasets in the app is not the same as on the website: https://data.gov.rs/sr/datasets/"
-    status: pending
+    status: completed
   - id: todo-1771846586147-zbp6hn8vt
     content: I want to show the total number of datasets somewhere in the app!
     status: pending
   - id: todo-1771846767247-cft10q4s2
     content: Add a button to reset all filters in the app!
+    status: pending
+  - id: todo-1771847498549-59s7inicr
+    content: "Detail screen need changes: all text is the same size and style at the moment which makes it hard to read. Improve typography drastically!"
     status: pending
 isProject: false
 ---

@@ -16,7 +16,11 @@ class DataGovRsApiClient {
 
   String get _base => baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
 
+  /// Sort value matching the portal default (datasets by last update, newest first).
+  static const String defaultSort = '-last_update';
+
   /// Search/list datasets with optional query and filters. Pagination via [page] and [limit].
+  /// Uses [defaultSort] so order matches https://data.gov.rs/sr/datasets/.
   Future<DatasetListResponse> searchDatasets({
     String? query,
     String? organization,
@@ -26,7 +30,7 @@ class DataGovRsApiClient {
     int? page,
     int? limit,
   }) async {
-    final params = <String, String>{};
+    final params = <String, String>{'sort': defaultSort};
     if (query != null && query.isNotEmpty) params['q'] = query;
     if (organization != null && organization.isNotEmpty) {
       params['organization'] = organization;
