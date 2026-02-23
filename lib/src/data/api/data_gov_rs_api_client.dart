@@ -1,4 +1,4 @@
-// ABOUTME: HTTP client for data.gov.rs API. Implements search and get-by-id per API_DISCOVERY.md.
+// ABOUTME: HTTP client for data.gov.rs API. Implements dataset search, get-by-id, and filter-option endpoints (licenses, frequencies, organizations) per API_DISCOVERY.md.
 // ABOUTME: Used by dataset providers; base URL from config or constant.
 
 import 'dart:convert';
@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/dataset.dart';
+import '../models/filter_options.dart';
 
 /// Client for data.gov.rs API (GET /api/1/datasets/ and GET /api/1/datasets/{id}/).
 class DataGovRsApiClient {
@@ -62,6 +63,65 @@ class DataGovRsApiClient {
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return Dataset.fromJson(json);
+  }
+
+  /// Fetches license options for filter dropdown (GET /api/1/datasets/licenses/).
+  Future<List<LicenseOption>> getLicenses() async {
+    final uri = Uri.parse('${_base}datasets/licenses/');
+    final response = await http.get(uri);
+    if (response.statusCode != 200) {
+      throw _apiException(response.statusCode, response.body);
+    }
+    final list = jsonDecode(response.body) as List<dynamic>;
+    return list
+        .map((e) => LicenseOption.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fetches frequency options for filter dropdown (GET /api/1/datasets/frequencies/).
+  Future<List<FrequencyOption>> getFrequencies() async {
+    final uri = Uri.parse('${_base}datasets/frequencies/');
+    final response = await http.get(uri);
+    if (response.statusCode != 200) {
+      throw _apiException(response.statusCode, response.body);
+    }
+    final list = jsonDecode(response.body) as List<dynamic>;
+    return list
+        .map((e) => FrequencyOption.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fetches all organization options for filter dropdown (GET /api/1/organizations/).
+  /// Paginates through all pages so the dropdown is never truncated when total > pageSize.
+  Future<List<OrganizationOption>> getOrganizations({
+    int pageSize = 200,
+  }) async {
+    final result = <OrganizationOption>[];
+    int page = 1;
+    int? total;
+
+    do {
+      final uri = Uri.parse('${_base}organizations/').replace(
+        queryParameters: {
+          'page': page.toString(),
+          'page_size': pageSize.toString(),
+        },
+      );
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        throw _apiException(response.statusCode, response.body);
+      }
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      total ??= json['total'] as int?;
+      final data = json['data'] as List<dynamic>?;
+      if (data == null || data.isEmpty) break;
+      for (final e in data) {
+        result.add(OrganizationOption.fromJson(e as Map<String, dynamic>));
+      }
+      page++;
+    } while (total != null && result.length < total);
+
+    return result;
   }
 
   Exception _apiException(int statusCode, String body) {

@@ -8,6 +8,7 @@ Rule #1: If you want exception to ANY rule, YOU MUST STOP and get explicit permi
 - A mobile catalog browser for Serbian open datasets.
   Think: “Google Play–style explorer for Serbian public data”
 - Current implementation plan is in .cursor/plans/serbia_open_data_explorer_implementation_483c036c.plan.md; read it for phase and todos,
+- All UI elements must be shown in Serbian latin language to the end user, since this is only Serbian market app
 
 ## Characteristics
 

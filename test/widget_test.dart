@@ -11,6 +11,6 @@ void main() {
       const ProviderScope(child: SerbiaOpenDataExplorerApp()),
     );
 
-    expect(find.text('Catalog (home)'), findsOneWidget);
+    expect(find.text('Katalog'), findsOneWidget);
   });
 }

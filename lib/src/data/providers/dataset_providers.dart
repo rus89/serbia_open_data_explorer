@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/data_gov_rs_api_client.dart';
 import '../models/dataset.dart';
+import '../models/filter_options.dart';
 
 const _defaultBaseUrl = 'https://data.gov.rs/api/1/';
 
@@ -62,6 +63,54 @@ class DatasetSearchParamsNotifier extends Notifier<DatasetSearchParams> {
     state = state.copyWith(query: q, page: 1);
   }
 
+  void setOrganization(String? id) {
+    state = DatasetSearchParams(
+      query: state.query,
+      organization: id,
+      license: state.license,
+      frequency: state.frequency,
+      format: state.format,
+      page: 1,
+      limit: state.limit,
+    );
+  }
+
+  void setLicense(String? id) {
+    state = DatasetSearchParams(
+      query: state.query,
+      organization: state.organization,
+      license: id,
+      frequency: state.frequency,
+      format: state.format,
+      page: 1,
+      limit: state.limit,
+    );
+  }
+
+  void setFrequency(String? id) {
+    state = DatasetSearchParams(
+      query: state.query,
+      organization: state.organization,
+      license: state.license,
+      frequency: id,
+      format: state.format,
+      page: 1,
+      limit: state.limit,
+    );
+  }
+
+  void setFormat(String? value) {
+    state = DatasetSearchParams(
+      query: state.query,
+      organization: state.organization,
+      license: state.license,
+      frequency: state.frequency,
+      format: value,
+      page: 1,
+      limit: state.limit,
+    );
+  }
+
   void setPage(int page) {
     state = state.copyWith(page: page);
   }
@@ -75,6 +124,33 @@ final datasetSearchParamsProvider =
 final dataGovRsApiClientProvider = Provider<DataGovRsApiClient>((ref) {
   return DataGovRsApiClient(baseUrl: _defaultBaseUrl);
 });
+
+final licensesProvider = FutureProvider<List<LicenseOption>>((ref) async {
+  final client = ref.watch(dataGovRsApiClientProvider);
+  return client.getLicenses();
+});
+
+final frequenciesProvider = FutureProvider<List<FrequencyOption>>((ref) async {
+  final client = ref.watch(dataGovRsApiClientProvider);
+  return client.getFrequencies();
+});
+
+final organizationsProvider = FutureProvider<List<OrganizationOption>>((
+  ref,
+) async {
+  final client = ref.watch(dataGovRsApiClientProvider);
+  return client.getOrganizations();
+});
+
+/// Format options for resource format filter (no API; fixed list per API_DISCOVERY.md).
+const formatFilterOptions = [
+  ('csv', 'CSV'),
+  ('json', 'JSON'),
+  ('xls', 'XLS'),
+  ('xlsx', 'XLSX'),
+  ('xml', 'XML'),
+  ('pdf', 'PDF'),
+];
 
 final datasetSearchResultsProvider = FutureProvider<DatasetListResponse>((
   ref,

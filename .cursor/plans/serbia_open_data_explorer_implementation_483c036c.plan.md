@@ -55,7 +55,7 @@ todos:
     status: completed
   - id: phase4-filters-ui
     content: Add filter dropdowns/chips for organization, license, frequency, format
-    status: pending
+    status: completed
   - id: phase4-list-widget
     content: Build dataset list view with loading, error, empty, success states
     status: pending
