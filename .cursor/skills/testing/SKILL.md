@@ -1,173 +1,106 @@
 ---
-name: custom-plugin-flutter-skill-testing
-description: 1600+ lines of testing mastery - unit tests, widget tests, integration tests, E2E, coverage, mocking with production-ready code examples.
-sasmp_version: "1.3.0"
-bonded_agent: 01-flutter-ui-development
-bond_type: PRIMARY_BOND
+name: testing
+description: |
+  Testing for Serbia Open Data Explorer. Writes and validates tests
+  for API clients, Riverpod providers, and Flutter widgets.
+  USE WHEN: writing new tests, verifying test coverage, running the test suite.
 ---
 
-# custom-plugin-flutter: Testing & QA Skill
+# Testing Skill — Serbia Open Data Explorer
 
-## Quick Start - Complete Test Suite
+## Project Testing Rules
+
+- **No mocks.** Tests use the real `data.gov.rs` API. Do not use mockito or any mock framework.
+- **Real API tests** are tagged `@Tags(['integration'])` so they can be run separately.
+- **Widget tests** use `ProviderScope` with real or overridden providers.
+- All test files MUST start with ABOUTME comments (two lines, each starting with `// ABOUTME: `).
+
+## Test Commands
+
+```bash
+flutter test                                  # All tests (integration + unit)
+flutter test --exclude-tags=integration       # Widget/unit tests only (fast, no network)
+flutter test --tags=integration               # Integration tests only (requires network)
+flutter test test/path/to/test.dart           # Single file
+flutter analyze                               # Static analysis (must be clean before commit)
+```
+
+## Integration Test Pattern (Real API)
 
 ```dart
-// Unit test
+// ABOUTME: Tests for DataGovRsApiClient against the live data.gov.rs API.
+// ABOUTME: Requires network access. Tagged 'integration'.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:serbia_open_data_explorer/src/data/api/data_gov_rs_api_client.dart';
+
+@Tags(['integration'])
 void main() {
-  group('Calculator', () {
-    late Calculator calc;
+  late DataGovRsApiClient client;
 
-    setUp(() {
-      calc = Calculator();
-    });
-
-    test('add returns sum', () {
-      expect(calc.add(2, 3), equals(5));
-    });
+  setUp(() {
+    client = DataGovRsApiClient(baseUrl: 'https://data.gov.rs/api/1/');
   });
-}
 
-// Widget test
-void main() {
-  testWidgets('Counter increments', (tester) async {
-    await tester.pumpWidget(const MyApp());
-    expect(find.text('0'), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    expect(find.text('1'), findsOneWidget);
-  });
-}
-
-// Integration test
-void main() {
-  group('User Flow', () {
-    testWidgets('Complete user journey', (tester) async {
-      await tester.pumpWidget(const MyApp());
-      
-      await tester.tap(find.text('Login'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Welcome'), findsOneWidget);
-    });
-  });
+  test('searchDatasets returns list', () async {
+    final response = await client.searchDatasets(page: 1, limit: 5);
+    expect(response.data, isA<List>());
+  }, timeout: const Timeout(Duration(seconds: 30)));
 }
 ```
 
-## 1. Unit Testing
+## Widget Test Pattern (ProviderScope)
 
 ```dart
-class UserService {
-  Future<User> getUser(String id) async {
-    // Implementation
-  }
-}
+// ABOUTME: Widget tests for DatasetListScreen.
+// ABOUTME: Uses ProviderScope with provider overrides for fast, isolated tests.
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('UserService', () {
-    late UserService service;
-    late MockUserRepository mockRepository;
-
-    setUp(() {
-      mockRepository = MockUserRepository();
-      service = UserService(mockRepository);
-    });
-
-    test('getUser returns user', () async {
-      final user = User(id: '1', name: 'John');
-      when(mockRepository.getUser('1')).thenAnswer((_) async => user);
-
-      final result = await service.getUser('1');
-
-      expect(result, user);
-      verify(mockRepository.getUser('1')).called(1);
-    });
-
-    test('getUser throws on error', () async {
-      when(mockRepository.getUser('1'))
-          .thenThrow(Exception('Not found'));
-
-      expect(
-        () => service.getUser('1'),
-        throwsException,
-      );
-    });
-  });
-}
-```
-
-## 2. Widget Testing
-
-```dart
-void main() {
-  testWidgets('Render user card', (tester) async {
-    const user = User(id: '1', name: 'John Doe', email: 'john@example.com');
-
+  testWidgets('shows loading indicator while fetching', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: UserCard(user: user))),
+      ProviderScope(
+        child: MaterialApp(home: DatasetListScreen()),
+      ),
     );
-
-    expect(find.text('John Doe'), findsOneWidget);
-    expect(find.text('john@example.com'), findsOneWidget);
-  });
-
-  testWidgets('Tap user card navigates', (tester) async {
-    const user = User(id: '1', name: 'John Doe', email: 'john@example.com');
-
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: UserCard(user: user))));
-
-    await tester.tap(find.byType(UserCard));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(UserDetailPage), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }
 ```
 
-## 3. Mocking
+## Provider Test Pattern
 
 ```dart
-class MockUserRepository extends Mock implements UserRepository {}
+// ABOUTME: Tests for Riverpod dataset providers.
+// ABOUTME: Verifies provider state transitions with real API.
 
-final mockRepository = MockUserRepository();
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:serbia_open_data_explorer/src/data/providers/dataset_providers.dart';
 
-// Setup mock behavior
-when(mockRepository.getUser('1')).thenAnswer((_) async => User(...));
-
-// Verify calls
-verify(mockRepository.getUser('1')).called(1);
-
-// Capture arguments
-final captured = verify(mockRepository.updateUser(captureAny)).captured;
-```
-
-## 4. Integration Testing
-
-```dart
+@Tags(['integration'])
 void main() {
-  group('User Creation Flow', () {
-    testWidgets('Create user and verify', (tester) async {
-      await tester.pumpWidget(const MyApp());
+  test('datasetSearchResultsProvider returns data', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
 
-      // Navigate to create user
-      await tester.tap(find.text('Add User'));
-      await tester.pumpAndSettle();
-
-      // Fill form
-      await tester.enterText(find.byKey(Key('nameField')), 'John');
-      await tester.enterText(find.byKey(Key('emailField')), 'john@example.com');
-
-      // Submit
-      await tester.tap(find.text('Create'));
-      await tester.pumpAndSettle();
-
-      // Verify result
-      expect(find.text('User created'), findsOneWidget);
-    });
-  });
+    final result = await container.read(datasetSearchResultsProvider.future);
+    expect(result.data, isNotEmpty);
+  }, timeout: const Timeout(Duration(seconds: 30)));
 }
 ```
 
----
+## Test File Locations
 
-**Ensure bulletproof quality with comprehensive testing.**
+| What | Where |
+|------|-------|
+| API client tests | `test/src/data/api/` |
+| Provider tests | `test/src/data/providers/` |
+| Widget tests | `test/src/presentation/` |
+
+## Coverage
+
+Target: 80%+ for all non-generated code. Run `flutter test --coverage` to check.
+Excluded from coverage: `main.dart`, generated files.

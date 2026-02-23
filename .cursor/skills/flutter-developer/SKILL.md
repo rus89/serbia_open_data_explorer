@@ -2,75 +2,88 @@
 name: flutter-developer
 description: |
   Flutter development for screens, features, and business logic.
-  USE WHEN: creating screens, implementing navigation
-  fixing bugs, state management, RBAC permissions, multi-step forms.
-  NOT FOR: single UI components <300 lines (use flutter-ui-components).
+  USE WHEN: creating screens, implementing navigation,
+  fixing bugs, state management, Riverpod providers.
 
   Examples:
   <example>
-  Context: User needs complete multi-screen feature.
-  user: "Implement hotel booking flow with search, details, and confirmation"
-  assistant: "I'll use flutter-developer skill for this complete flow with navigation and state."
-  <commentary>Multi-screen flows require flutter-developer.</commentary>
-  </example>
-  <example>
-  Context: Simple UI component needed.
-  user: "Create a new action button component"
-  assistant: "I'll use flutter-ui-components for this single component."
-  <commentary>Single components use flutter-ui-components, not flutter-developer.</commentary>
+  Context: User needs a new feature screen.
+  user: "Implement the dataset catalog search screen"
+  assistant: "I'll use flutter-developer skill for this screen with Riverpod state and GoRouter navigation."
+  <commentary>Screens with state and navigation use flutter-developer.</commentary>
   </example>
 ---
 
 # Flutter Developer Skill
 
-Elite Flutter Developer. Handles ALL frontend development from bug fixes to complex multi-screen features.
+Handles ALL Flutter development for this project: bug fixes, screens, navigation, and Riverpod state management.
+
+## Project Context
+
+- **App:** Serbia Open Data Explorer — mobile catalog browser for `data.gov.rs` datasets
+- **State:** Riverpod (`flutter_riverpod`) — FutureProvider, NotifierProvider
+- **Navigation:** GoRouter — routes defined in `lib/src/routing/app_router.dart`
+- **Routes:** `AppRoutes.home` (`/`), `AppRoutes.datasetDetail` (`/dataset/:id`)
+- **API:** `DataGovRsApiClient` in `lib/src/data/api/`
+- **Providers:** `lib/src/data/providers/dataset_providers.dart`
 
 ## Scope
 
 **You Handle:**
 
 - Bug fixes (any file count)
-- Small features (1-2 files with business logic)
-- Medium features (2-3 files, moderate complexity)
-- Complex features (3+ files, multiple screens)
-- Multi-screen user flows
-- State management (simple to complex)
-- Navigation implementation (GoRouter)
-- RBAC permission checks
-- Business logic implementation
-- Multi-step forms and wizards
-
-**Delegate To:**
-
-- `flutter-ui-components`: Standalone UI components < 300 lines WITHOUT business logic
-- `backend-dev`: Database operations, migrations, RLS
-- `testing-agent`: Test creation and validation
-- `architecture-analyzer`: Architecture review
+- New screens and widgets
+- Riverpod provider implementation
+- GoRouter navigation
+- API integration via existing providers
+- Error and loading state handling
 
 ## Core Expertise
 
-- Flutter 3.37+ (Web-first, PWA-enabled applications)
+- Flutter 3.x (mobile-first)
 - Material Design 3
-- GoRouter 12.1.3 declarative navigation
-- RBAC with 44 granular permissions
-- Responsive and adaptive layouts
+- GoRouter declarative navigation
+- Riverpod async providers (`FutureProvider.when`, `AsyncValue`)
 
 ## Critical Rules
 
 - NEVER use BuildContext after async without checking `mounted`
-- NEVER hardcode routes - use route constants
-- NEVER skip permission checks for privileged actions
+- NEVER hardcode routes — use `AppRoutes` constants
 - ALWAYS prefer editing existing files over creating new ones
-- ALWAYS use Design System components over custom widgets
 - ALWAYS handle errors with try-catch for async operations
 - ALWAYS dispose controllers and resources
 - ALWAYS follow naming conventions strictly
+- ALWAYS write ABOUTME comments at the top of every new file
+
+## Riverpod Patterns
+
+```dart
+// Read async provider in widget
+ref.watch(datasetSearchResultsProvider).when(
+  data: (result) => ...,
+  loading: () => const CircularProgressIndicator(),
+  error: (e, _) => Text('Error: $e'),
+);
+
+// Update search params
+ref.read(datasetSearchParamsProvider.notifier).setQuery('javni');
+```
+
+## Navigation Patterns
+
+```dart
+// Navigate to detail
+context.push(AppRoutes.datasetDetail.replaceFirst(':id', dataset.id));
+
+// Go back
+context.pop();
+```
 
 ## Testing Commands
 
 ```bash
-flutter test                          # All tests
-flutter test test/path/to/test.dart   # Single test
-flutter test --coverage               # With coverage
-flutter analyze                       # Static analysis
+flutter test                                  # All tests (including integration)
+flutter test --exclude-tags=integration       # Unit/widget tests only
+flutter test test/path/to/test.dart           # Single file
+flutter analyze                               # Static analysis
 ```
