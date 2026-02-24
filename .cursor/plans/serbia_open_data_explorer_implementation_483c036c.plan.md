@@ -143,6 +143,33 @@ todos:
   - id: todo-1771860860479-y0deqju5n
     content: Analyze this initial plan with the execution and implementation, and see the results!
     status: completed
+  - id: todo-review-e2e-policy
+    content: '(Code review) Define e2e vs mocks policy. In CLAUDE.md or doc (e.g. doc/TESTING.md): which tests are e2e (real API only), which may use fakes (e.g. app_list_detail_flow_test) or provider overrides (widget tests). Align with "no mocks in e2e" rule.'
+    status: pending
+  - id: todo-review-flow-test-tag
+    content: (Code review) Tag app_list_detail_flow_test. Add @Tags(['integration']) (or similar) in test/src/presentation/app_list_detail_flow_test.dart so "e2e with real API" can exclude it; update README to match (e.g. when to use --exclude-tags=integration).
+    status: pending
+  - id: todo-review-partial-match-total
+    content: (Code review) Partial-match fallback total. In lib/src/data/providers/dataset_providers.dart add a short comment that in fallback mode total is the filtered count of the first fetched page, not full result set. Optionally in home_screen.dart change label when in fallback (e.g. "Prikazano N" or "Najmanje N rezultata").
+    status: pending
+  - id: todo-review-portal-link-logging
+    content: (Code review) When url_launcher launchUrl returns false in dataset_detail_screen.dart (_openPortalPage), add debugPrint or logger so failures are visible when the system does not open the URL.
+    status: pending
+  - id: todo-review-sort-ui
+    content: (Code review, optional) Expose sort in UI. Add dropdown or chips on home (e.g. "Po ažuriranju") so user can change sort; API already supports -last_update; other sort values (reuses/followers) are 400 per API_DISCOVERY.md — implement when/if API supports.
+    status: pending
+  - id: todo-review-home-split
+    content: (Code review, optional) If home_screen.dart becomes hard to maintain, split into e.g. home_filter_section.dart and home_dataset_list.dart; not required for production.
+    status: pending
+  - id: todo-1771929416562-khcljolv8
+    content: Let's add a bottom screen buttons ("Početna" i "O Aplikaciji").
+    status: pending
+  - id: todo-1771929460694-rx23t8wws
+    content: Let's add About page which will be shown to the end user when he/she click on a bottom screen button "O Aplikacijia" where they will be able to find general informations about application.
+    status: pending
+  - id: todo-1771929735142-5p4lh66ho
+    content: strict-casts, strict-inference, strict-raw-types aren't in analysis_options.yaml. The rules added are style/correctness lints, which is good, but they don't catch raw types or implicit downcasts. For a production app this matters — List instead of List<Dataset> compiles clean without strict mode.
+    status: completed
 isProject: false
 ---
 
@@ -380,6 +407,23 @@ test/
 - **API shape:** If data.gov.rs differs from CKAN (e.g. different base path or action names), Phase 1 discovery is mandatory; Phase 2 models and client must follow the actual responses.
 - **Design:** Plan uses Material 3 by default. If you later add a design system (e.g. a local package or tokens), it can be introduced in Phase 4/5 without changing this plan’s structure.
 - **Git:** Per GlobalRules, initialize git if missing; use WIP branches and small commits per phase.
+
+---
+
+## Production-readiness follow-up (from code review)
+
+After the 2026-02-24 code review (commits 8d7a275..097ff50), the following todos were added to close the “With fixes” gap before calling the codebase production-ready. Implement in order where dependencies exist.
+
+| Todo ID                           | What                                                                                                                                                                                                                      | Priority  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `todo-review-e2e-policy`          | Define in CLAUDE.md or doc/TESTING.md: which tests are e2e (real API only), which may use fakes or provider overrides. Align with “no mocks in e2e” rule.                                                                 | Important |
+| `todo-review-flow-test-tag`       | Add `@Tags(['integration'])` to `test/src/presentation/app_list_detail_flow_test.dart`; update README so `--exclude-tags=integration` is accurate.                                                                        | Important |
+| `todo-review-partial-match-total` | In `dataset_providers.dart` document that in partial-match fallback mode `total` is the filtered count of the first page. Optionally in `home_screen.dart` show “Prikazano N” or “Najmanje N rezultata” when in fallback. | Important |
+| `todo-review-portal-link-logging` | In `dataset_detail_screen.dart` when `launchUrl` returns false, add `debugPrint` or logger so failures are visible.                                                                                                       | Minor     |
+| `todo-review-sort-ui`             | (Optional) Expose sort in home UI (dropdown/chips). API currently only accepts `-last_update`.                                                                                                                            | Optional  |
+| `todo-review-home-split`          | (Optional) If `home_screen.dart` is hard to maintain, split e.g. into `home_filter_section.dart` and `home_dataset_list.dart`.                                                                                            | Optional  |
+
+**Files to touch:** `CLAUDE.md` or `doc/TESTING.md`, `test/src/presentation/app_list_detail_flow_test.dart`, `README.md`, `lib/src/data/providers/dataset_providers.dart`, `lib/src/presentation/home_screen.dart`, `lib/src/presentation/dataset_detail_screen.dart`. Run `flutter analyze` and `flutter test` after each change; commit per task.
 
 ---
 
