@@ -7,6 +7,9 @@ abstract final class AppRoutes {
 
   static const String home = '/';
 
+  /// About the app (bottom nav "O Aplikaciji").
+  static const String about = '/about';
+
   /// Path pattern for dataset detail (use with GoRoute). Path param: :id.
   static const String datasetDetail = '/dataset/:id';
 
