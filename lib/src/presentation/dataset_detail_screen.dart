@@ -121,6 +121,20 @@ class _DatasetDetailContent extends StatelessWidget {
               ),
             ),
           ],
+          if (dataset.page != null && dataset.page!.trim().isNotEmpty) ...[
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: () => _openPortalPage(context, dataset.page!),
+              icon: const Icon(Icons.open_in_browser, size: 20),
+              label: const Text('Otvoriti na portalu'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           if (dataset.publisherName != null) ...[
             _DetailSection(
@@ -174,6 +188,20 @@ class _DatasetDetailContent extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static Future<void> _openPortalPage(
+    BuildContext context,
+    String pageUrl,
+  ) async {
+    final uri = Uri.tryParse(pageUrl);
+    if (uri == null) return;
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (context.mounted && !launched) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nije moguće otvoriti link.')),
+      );
+    }
   }
 
   static String _formatLastUpdate(String? raw) {

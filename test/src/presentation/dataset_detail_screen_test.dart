@@ -93,4 +93,45 @@ void main() {
       expect(find.text('CSV'), findsOneWidget);
     },
   );
+
+  testWidgets('shows Otvoriti na portalu button when dataset has page', (
+    tester,
+  ) async {
+    final datasetWithPage = Dataset(
+      id: testId,
+      title: 'With portal link',
+      description: null,
+      page: 'https://data.gov.rs/dataset/some-slug',
+      resources: const [],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          datasetDetailProvider(
+            testId,
+          ).overrideWith((ref) => Future<Dataset>.value(datasetWithPage)),
+        ],
+        child: MaterialApp(home: DatasetDetailScreen(id: testId)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Otvoriti na portalu'), findsOneWidget);
+  });
+
+  testWidgets('does not show Otvoriti na portalu when dataset has no page', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          datasetDetailProvider(
+            testId,
+          ).overrideWith((ref) => Future<Dataset>.value(fakeDataset)),
+        ],
+        child: MaterialApp(home: DatasetDetailScreen(id: testId)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Otvoriti na portalu'), findsNothing);
+  });
 }

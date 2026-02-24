@@ -133,12 +133,15 @@ todos:
     status: completed
   - id: todo-1771860549114-o47yxvxdq
     content: "“Open on portal: Add a button or link (e.g. „Otvoriti na portalu” / „Pogledaj na data.gov.rs”) that opens dataset.page in the browser via url_launcher, so users can reach discussions, reuses, and participate on the portal.”"
-    status: pending
+    status: completed
   - id: todo-1771860555413-vxd95ql7w
     content: "“Add sort control: default sort by last update (newest first), e.g. API sort=-last_update; optionally allow sort by reuses/followers if API supports it”."
-    status: in_progress
+    status: completed
   - id: todo-1771860662653-7wdhqs346
     content: "“Sort: pass sort to the list API (e.g. -last_update as default to align with portal); expose sort choice in UI (e.g. dropdown or chips).”"
+    status: completed
+  - id: todo-1771860860479-y0deqju5n
+    content: Analyze this initial plan with the execution and implementation, and see the results!
     status: pending
 isProject: false
 ---
