@@ -1,4 +1,4 @@
-package com.example.serbia_open_data_explorer
+package com.serbiaOpenData.openDataExplorer
 
 import io.flutter.embedding.android.FlutterActivity
 
