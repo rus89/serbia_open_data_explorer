@@ -21,3 +21,8 @@ description: They use it to remember the most important elements about the proje
 - Confirmed data layer tests cover search (API: list+pagination, query, filters; providers: load, refetch on params, filters, page), getById (API: found + not-found throws; providers: exists + throws), and error handling.
 - Added API client test: `searchDatasets throws when server returns non-200` using real API (baseUrl with nonexistent path yields 404). Error handling now covers both getDatasetById (non-existent id) and searchDatasets (HTTP error).
 - All tests use real API; no mocks. `flutter test test/src/data/` and `flutter analyze` pass.
+
+## 2026-02-24 — Home screen extraction and plan sync
+
+- Refactored routing: home UI (search, filters, list, tiles) moved from `app_router.dart` into `lib/src/presentation/home_screen.dart`. Router file now only configures GoRouter and ShellRoute; `HomeScreen` is the public widget used for the home route. Behavior unchanged; `flutter analyze` and full test suite pass.
+- Updated implementation plan: “Current state” reflects actual codebase (Phases 1–6 done, real deps), “Suggested directory layout” renamed to “as-built” and updated (presentation/home_screen.dart, theme, filter_options, resource). Dependencies section aligned with pubspec (no riverpod_annotation/riverpod_generator). Marked todo “Analyze this initial plan with the execution and implementation” as completed.

@@ -142,7 +142,7 @@ todos:
     status: completed
   - id: todo-1771860860479-y0deqju5n
     content: Analyze this initial plan with the execution and implementation, and see the results!
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -150,8 +150,9 @@ isProject: false
 
 ## Current state
 
-- **Codebase:** Empty. No `pubspec.yaml`, no `lib/`, no Flutter app.
-- **Defined:** [.cursor/rules/ProjectRules.md](.cursor/rules/ProjectRules.md) (features, API, Riverpod, TDD), [.cursor/rules/GlobalRules.md](.cursor/rules/GlobalRules.md) (workflow, TDD, git), and [.cursor/skills/flutter-developer/](.cursor/skills/flutter-developer/) (navigation, patterns; written for another app but usable as reference).
+- **Codebase:** Flutter app with `lib/`, `test/`, `doc/`. Phases 1–6 implemented: data layer (API client, models, Riverpod providers), GoRouter with home and dataset detail, home screen (search, filters, list with load-more), dataset detail screen (description, resources, “Otvoriti na portalu”), tests and `flutter analyze` clean.
+- **Dependencies (actual):** `flutter_riverpod`, `go_router`, `http`, `url_launcher`; dev: `flutter_lints`, `build_runner`. No `riverpod_annotation`/`riverpod_generator` (plain Riverpod).
+- **Defined:** [.cursor/rules/ProjectRules.md](.cursor/rules/ProjectRules.md) (features, API, Riverpod, TDD), [.cursor/rules/GlobalRules.md](.cursor/rules/GlobalRules.md) (workflow, TDD, git), [.cursor/skills/flutter-developer/](.cursor/skills/flutter-developer/) (navigation, patterns), [doc/API_DISCOVERY.md](doc/API_DISCOVERY.md), [doc/WEBSITE_ANALYSIS.md](doc/WEBSITE_ANALYSIS.md).
 
 ## Constraints and decisions
 
@@ -334,35 +335,43 @@ isProject: false
 
 ---
 
-## Suggested directory layout
+## Suggested directory layout (as-built)
 
 ```text
 lib/
+  main.dart
   src/
     data/
       api/
         data_gov_rs_api_client.dart
       models/
         dataset.dart
+        filter_options.dart
+        resource.dart
       providers/
         dataset_providers.dart
+    presentation/
+      dataset_detail_screen.dart
+      home_screen.dart
+      theme/
+        app_theme.dart
     routing/
       app_routes.dart
       app_router.dart
-  app.dart
-  main.dart
 test/
-  ... (mirror or feature-based)
+  src/
+    data/
+      api/
+      providers/
+    presentation/
+  widget_test.dart
 ```
 
 ---
 
-## Dependencies (to add in Phase 1)
+## Dependencies (as used in project)
 
-- `flutter_riverpod` + `riverpod_annotation` + `riverpod_generator` (and `build_runner`, `custom_lint` if using generated code).
-- `go_router`.
-- `http` or `dio`.
-- `url_launcher` (for download links).
+- `flutter_riverpod`, `go_router`, `http`, `url_launcher`. Dev: `flutter_lints`, `build_runner`. No riverpod_annotation/riverpod_generator.
 
 ---
 
