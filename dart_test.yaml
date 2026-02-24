@@ -1,0 +1,4 @@
+# Test configuration. Defines tags so --exclude-tags=integration works without warnings.
+# See CLAUDE.md "E2E vs mocks policy" and README "Tests".
+tags:
+  integration: {}
