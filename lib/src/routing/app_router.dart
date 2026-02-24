@@ -17,7 +17,8 @@ GoRouter createAppRouter() {
       ShellRoute(
         builder: (context, state, child) {
           final location = state.matchedLocation;
-          final isAboutBranch = location == AppRoutes.about ||
+          final isAboutBranch =
+              location == AppRoutes.about ||
               location.startsWith('${AppRoutes.about}/');
           final currentIndex = isAboutBranch ? 1 : 0;
           return Scaffold(
