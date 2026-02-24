@@ -175,6 +175,12 @@ actual purpose.
 - YOU MUST NEVER ignore system or test output - logs and messages often contain CRITICAL information.
 - Test output MUST BE PRISTINE TO PASS. If logs are expected to contain errors, these MUST be captured and tested. If a test is intentionally triggering an error, we _must_ capture and validate that the error output is as we expect
 
+**E2E vs mocks policy**
+
+- **E2E tests** (end-to-end): Full app or critical user flows against the **real** data.gov.rs API. No fake clients, no provider overrides. Use real data only. Run with `flutter test` (include all tests) or a dedicated e2e suite; do not use mocks here.
+- **Integration / flow tests**: Tests that drive the app (e.g. app → list → detail) but use a **fake API client** for speed and stability. Tag with `@Tags(['integration'])` (or similar). Excluded when running “strict e2e” (e.g. `flutter test --exclude-tags=integration`). Allowed to use fakes; they are not considered e2e.
+- **Widget / unit tests**: May use **provider overrides** or fixed data to isolate UI or logic. The test must assert real behavior (e.g. that the widget shows the data it is given), not that a mock was called. Overriding `datasetDetailProvider(id)` with a fixed `Future<Dataset>` for a widget test is allowed.
+
 ## Issue tracking
 
 - You MUST use your TodoWrite tool to keep track of what you're doing

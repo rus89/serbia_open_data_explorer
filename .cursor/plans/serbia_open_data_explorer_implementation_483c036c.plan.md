@@ -145,10 +145,10 @@ todos:
     status: completed
   - id: todo-review-e2e-policy
     content: '(Code review) Define e2e vs mocks policy. In CLAUDE.md or doc (e.g. doc/TESTING.md): which tests are e2e (real API only), which may use fakes (e.g. app_list_detail_flow_test) or provider overrides (widget tests). Align with "no mocks in e2e" rule.'
-    status: pending
+    status: completed
   - id: todo-review-flow-test-tag
     content: (Code review) Tag app_list_detail_flow_test. Add @Tags(['integration']) (or similar) in test/src/presentation/app_list_detail_flow_test.dart so "e2e with real API" can exclude it; update README to match (e.g. when to use --exclude-tags=integration).
-    status: pending
+    status: completed
   - id: todo-review-partial-match-total
     content: (Code review) Partial-match fallback total. In lib/src/data/providers/dataset_providers.dart add a short comment that in fallback mode total is the filtered count of the first fetched page, not full result set. Optionally in home_screen.dart change label when in fallback (e.g. "Prikazano N" or "Najmanje N rezultata").
     status: pending

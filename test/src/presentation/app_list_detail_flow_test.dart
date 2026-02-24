@@ -104,5 +104,6 @@ void main() {
       );
       expect(find.text('Preuzmi CSV'), findsOneWidget);
     },
+    tags: const ['integration'],
   );
 }

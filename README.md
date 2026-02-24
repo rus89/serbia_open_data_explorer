@@ -76,7 +76,7 @@ Run all tests:
 flutter test
 ```
 
-Exclude integration tests (e.g. when offline or in CI without device):
+Exclude integration tests (flow test that uses a fake API client; use when you want only real-API tests or when offline):
 
 ```bash
 flutter test --exclude-tags=integration
