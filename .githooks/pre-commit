@@ -6,4 +6,4 @@ set -e
 flutter analyze
 dart format .
 # Re-stage any files that were just formatted so they are included in this commit.
-git add -u
+# git add -u
